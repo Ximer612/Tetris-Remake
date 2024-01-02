@@ -1,19 +1,8 @@
-#include "raylib.h"
+#include <raylib.h>
 #include <time.h>
+#include <my_tetris.h>
+#include <string.h>
 
-#define STAGE_WIDTH 12
-#define STAGE_HEIGHT 22
-#define TILE_SIZE 16
-#define WINDOW_WIDTH 512
-#define WINDOW_HEIGHT 512
-
-#define iTetrominoColor 0x00F0F0
-#define oTetrominoColor 0xF0F000
-#define tTetrominoColor 0xA000F0
-#define jTetrominoColor 0x0000F0
-#define lTetrominoColor 0xF0A000
-#define sTetrominoColor 0x00F000
-#define zTetrominoColor 0xF00000
 
 int stage[] = {
 1,0,0,0,0,0,0,0,0,0,0,1,
@@ -238,11 +227,14 @@ const int *tetrominoTypes[7][4] =
     {lTetromino0, lTetromino90, lTetromino180, lTetromino270},
 };
 
+const Color tetrominoColors[7] =
+{
+    {240,0,0,255},{0,240,0,255},{160,0,240,255},{240,240,0,255},{0,240,240,255},{0,0,240,255},{240,160,0,255}
+};
 
 const int stageOffsetX = WINDOW_WIDTH / 2 - (STAGE_WIDTH * TILE_SIZE) / 2;
 const int stageOffsetY = (STAGE_HEIGHT / 2 - (STAGE_HEIGHT * TILE_SIZE) / 2) /2;
 const int startPieceX = STAGE_WIDTH/2 - 2; //2 = widthPiece/2 = 4/2 = 2
-const int widthPiece = 4;
 int myPieces[16];
 int myPieceX = 0;
 int myPieceY = 0;
@@ -255,11 +247,56 @@ float pieceDownCounter = 0.f;
 
 void DrawStage();
 void SetTetraminoPiece();
-void SetRandomPlayerColor();
+Color GetRandomColor();
 void InputManage();
 void DrawPlayer();
-void RespawnTetramino();
+void SetTetraminoToStage();
 int CheckPieceCollisions(int upOrDown, int leftOrRight);
+
+void ResetLines(int startLineY)
+{
+    for (int y = startLineY; y >= 0; y--)
+    {
+        for (int x = 1; x < STAGE_WIDTH - 1; x++)
+        {
+            const int offset = y * STAGE_WIDTH + x;
+            const int offset_below = (y+1) * STAGE_WIDTH + x;
+
+            if (stage[offset_below] == 0 && stage[offset] > 0)
+            {
+                stage[offset_below] = stage[offset];
+                stage[offset] = 0;
+            }
+        }
+    }   
+}
+
+void DeleteLines()
+{
+    for (int y = 0; y < STAGE_HEIGHT - 1; y++)
+    {
+        int checkLine = 1;
+
+        for (int x = 1; x < STAGE_WIDTH - 1; x++)
+        {
+            const int offset = y * STAGE_WIDTH + x;
+
+            if (stage[offset] == 0)
+            {
+                checkLine = 0;
+                break;
+            }
+        }
+
+        if(checkLine)
+        {
+            const int offset = y * STAGE_WIDTH + 1;
+            memset(stage+offset,0,(STAGE_WIDTH-2)* sizeof(int));
+
+            ResetLines(y);
+        }
+    }   
+}
 
 int main(int argc, char** argv, char** environ)
 {    
@@ -268,8 +305,7 @@ int main(int argc, char** argv, char** environ)
 
     pieceDownCounter = pieceDownTimer;
 
-    RespawnTetramino();
-    SetRandomPlayerColor();
+    SetTetraminoToStage();
 
     while (!WindowShouldClose())
     {
@@ -304,7 +340,8 @@ void InputManage()
             return;           
         }
     
-        RespawnTetramino();
+        SetTetraminoToStage();
+        DeleteLines();
               
     }
 
@@ -318,6 +355,7 @@ void InputManage()
 
     if (IsKeyPressed(KEY_SPACE))
     {
+        const int lastRotation = currentTetraminoRotation;
         currentTetraminoRotation++;
         if (currentTetraminoRotation > 3)
         {
@@ -329,11 +367,7 @@ void InputManage()
         int hasCollide = CheckPieceCollisions(0,0);
 
         if(hasCollide){
-            currentTetraminoRotation--;
-            if(currentTetraminoRotation<0)
-            {
-                currentTetraminoRotation=3;
-            }
+            currentTetraminoRotation = lastRotation;
             SetTetraminoPiece();
         }
 
@@ -350,18 +384,18 @@ void InputManage()
     }
 }
 
-void RespawnTetramino(){
+void SetTetraminoToStage(){
     const int myIndex = (myPieceY)*STAGE_WIDTH+myPieceX;
 
-        for (int y = 0; y < widthPiece; y++)
+        for (int y = 0; y < TETROMINO_SIZE; y++)
             {
-                for (int x = 0; x < widthPiece; x++)
+                for (int x = 0; x < TETROMINO_SIZE; x++)
                 {
-                    if(myPieces[x+y*widthPiece] == 1)
+                    if(myPieces[x+y*TETROMINO_SIZE] == 1)
                     {
                         const int index = myIndex+x+y*STAGE_WIDTH;
 
-                        stage[index] = 1;
+                        stage[index] = 1 + myTetraminoType;
                     }    
                 }
             } 
@@ -375,13 +409,12 @@ void RespawnTetramino(){
             time_t unixTime;
             time(&unixTime);
             SetRandomSeed(unixTime);
-            myTetraminoType = GetRandomValue(0,6);
+            myTetraminoType = GetRandomValue(0,7);
         }
 
         oldTetraminoType = myTetraminoType;
 
         SetTetraminoPiece();
-        SetRandomPlayerColor();  
 }
 
 void SetTetraminoPiece(){
@@ -390,14 +423,19 @@ void SetTetraminoPiece(){
     {
         myPieces[i] = tetrominoTypes[myTetraminoType][currentTetraminoRotation][i];
     }
+
+    playerColor = tetrominoColors[myTetraminoType];
 }
 
-void SetRandomPlayerColor()
+Color GetRandomColor()
 {
-    playerColor.r = GetRandomValue(0,255);
-    playerColor.g = GetRandomValue(0,255);
-    playerColor.b = GetRandomValue(0,255);
-    playerColor.a = 255;
+    Color randomColor;
+    randomColor.r = GetRandomValue(0,255);
+    randomColor.g = GetRandomValue(0,255);
+    randomColor.b = GetRandomValue(0,255);
+    randomColor.a = 255;
+
+    return randomColor;
 }
 
 void DrawStage()
@@ -411,7 +449,7 @@ void DrawStage()
             if(stage[x+y*STAGE_WIDTH] > 0)
             {
                 //wall
-                myColor = BLUE;                 
+                myColor = tetrominoColors[stage[x+y*STAGE_WIDTH]-1];                 
             }
             else
             {
@@ -429,40 +467,14 @@ void DrawStage()
 
 void DrawPlayer()
 {
-    for (int y = 0; y < widthPiece; y++)
+    for (int y = 0; y < TETROMINO_SIZE; y++)
     {
-        for (int x = 0; x < widthPiece; x++)
+        for (int x = 0; x < TETROMINO_SIZE; x++)
         {
-            if(myPieces[x+y*widthPiece] > 0)
+            if(myPieces[x+y*TETROMINO_SIZE] > 0)
             {
                 DrawRectangle((myPieceX + x) * TILE_SIZE + stageOffsetX, (myPieceY + y) *TILE_SIZE - stageOffsetY,TILE_SIZE,TILE_SIZE,playerColor);  
             }    
         }
     }  
-}
-
-int CheckPieceCollisions(int upOrDown, int leftOrRight)
-{
-    const int myIndex = (myPieceY)*STAGE_WIDTH+myPieceX;
-
-    int hasCollide = 0;
-
-    for (int y = 0; y < widthPiece; y++)
-    {
-        for (int x = 0; x < widthPiece; x++)
-        {
-            if(myPieces[x+y*widthPiece] > 0)
-            {
-                const int index = myIndex+x+y*STAGE_WIDTH+leftOrRight+STAGE_WIDTH*upOrDown;
-
-                if(stage[index] > 0)
-                {
-                    hasCollide = 1;
-                    break;
-                }
-            }    
-        }
-    } 
-
-    return hasCollide;
 }
