@@ -265,6 +265,13 @@ const int *tetrominoTypes[7][4] =
 
 #pragma endregion
 
+//CONST VARIABLES
+const int startOffsetX = (WINDOW_WIDTH / 2) - ((STAGE_WIDTH * TILE_SIZE) / 2);
+const int startOffsetY = (WINDOW_HEIGHT / 2) - ((STAGE_HEIGHT * TILE_SIZE) / 2);
+const int tetrominoStartX = STAGE_WIDTH / 2 - 2;
+const int tetrominoStartY = 0;
+
+//GAME SCENES VARIABLES
 typedef struct{
 
     void (*OnEnter)();
@@ -272,6 +279,16 @@ typedef struct{
     void (*OnExit)();
 
 } GameScene;
+
+int is_game_paused = 0;
+int is_waiting_for_ending_effect = 0;
+
+GameScene* actual_game_scene;
+
+GameScene gameover_Scene;
+GameScene maingame_Scene;
+GameScene startmenu_Scene;
+GameScene pause_Scene;
 
 Sound sfx_hit_piece;
 Sound sfx_line_completed;
@@ -282,19 +299,12 @@ Music music_startmenu;
 
 Music* currentMusic;
 
+//PLAYER VARIABLES
+
 int actual_score;
-int highscore;
+int highscore = 12345678;
 
 float actual_falling_speed = MAX_FALL_SPEED;
-
-bool is_game_paused = false;
-
-GameScene* actual_game_scene;
-
-GameScene gameover_Scene;
-GameScene maingame_Scene;
-GameScene startmenu_Scene;
-GameScene pause_Scene;
 
 int currentColor;
 int currentTetrominoType;
@@ -302,16 +312,19 @@ int currentRotation;
 int currentTetrominoX;
 int currentTetrominoY;
 
-const int startOffsetX = (WINDOW_WIDTH / 2) - ((STAGE_WIDTH * TILE_SIZE) / 2);
-const int startOffsetY = (WINDOW_HEIGHT / 2) - ((STAGE_HEIGHT * TILE_SIZE) / 2);
+int last_tetramino_type = -1;
 
-const int tetrominoStartX = STAGE_WIDTH / 2 - 2;
-const int tetrominoStartY = 0;
+//TIMERS
 
 float counterToMoveTetrominoDown;
 
-const float timerToShowCompletedLineEffect;
+const float timerToShowCompletedLineEffect = 0.5f;
 float counterToShowCompletedLineEffect;
+
+//EFFECT VARIABLES
+
+int to_remove_lines[STAGE_HEIGHT];
+int index_color_effect = 0;
 
 void DrawPlayerTetromino(const Color current_color, const int *tetromino)
 {
@@ -388,13 +401,10 @@ int DeleteCompletedLines()
 
         if(checkLine)
         {
-            const int offset = y * STAGE_WIDTH + 1; //offset of the first tetramino of the line
-            memset(stage+offset,0,(STAGE_WIDTH-2)* sizeof(int)); //set the whole line to 0
-
-            PushDownTetrominos(y);
-
+            is_waiting_for_ending_effect = true;
             PlaySound(sfx_line_completed);
-
+            const int offset = y * STAGE_WIDTH + 1; //offset of the first tetramino of the line
+            to_remove_lines[y] = offset;
             deleted_lines++;
         }
     }   
@@ -418,7 +428,12 @@ void SpawnNewPlayerTetromino()
     currentTetrominoX = tetrominoStartX;
     currentTetrominoY = tetrominoStartY;
 
-    currentTetrominoType = GetRandomValue(0, 6);
+    do
+    {
+        currentTetrominoType = GetRandomValue(0, 6);
+    } while (currentTetrominoType == last_tetramino_type);
+    last_tetramino_type = currentTetrominoType;
+    
     currentRotation = 0;
     currentColor = currentTetrominoType+1;
 
@@ -429,33 +444,8 @@ void SpawnNewPlayerTetromino()
     }
 }
 
-void GameLoopOnEnter()
+void PlayerInputManager()
 {
-    
-}
-
-void GameLoopOnExit()
-{
-    actual_game_scene = &gameover_Scene;
-}
-
-void GameLoop()
-{
-    if(IsKeyPressed(KEY_P))
-    {
-        is_game_paused = !is_game_paused;
-    }
-
-    UpdateMusicStream(*currentMusic);
-
-    counterToMoveTetrominoDown -= GetFrameTime();
-
-    if(IsKeyPressed(KEY_E))
-    {
-        //debug key for doubling points
-        AddScore(actual_score*2);
-    }
-
     if (IsKeyPressed(KEY_SPACE))
     {
         const int lastRotation = currentRotation;
@@ -472,7 +462,7 @@ void GameLoop()
         }
     }
 
-    if (IsKeyPressed(KEY_RIGHT))
+    else if (IsKeyPressed(KEY_RIGHT))
     {
         // No need to check overflow, wall is your protector
         if (!CheckCollision(currentTetrominoX+1,currentTetrominoY,tetrominoTypes[currentTetrominoType][currentRotation]))
@@ -480,7 +470,7 @@ void GameLoop()
             currentTetrominoX++;
         }
     }
-    if (IsKeyPressed(KEY_LEFT))
+    else if (IsKeyPressed(KEY_LEFT))
     {
         // No need to check overflow, wall is your protector
         if (!CheckCollision(currentTetrominoX-1,currentTetrominoY,tetrominoTypes[currentTetrominoType][currentRotation]))
@@ -527,6 +517,82 @@ void GameLoop()
             SpawnNewPlayerTetromino();
         }
     }
+}
+
+void GameLoopOnEnter()
+{
+    float timeToMoveTetrominoDown = actual_falling_speed;
+    counterToShowCompletedLineEffect = timerToShowCompletedLineEffect;
+
+    currentMusic = &music_ingame2;
+    PlayMusicStream(*currentMusic);
+
+    SpawnNewPlayerTetromino();
+}
+
+void GameLoopOnExit()
+{
+    actual_game_scene = &gameover_Scene;
+}
+
+void GameLoop()
+{
+    UpdateMusicStream(*currentMusic);
+
+    if(IsKeyPressed(KEY_P))
+    {
+        is_game_paused = !is_game_paused;
+    }
+
+    if(is_game_paused) goto game_loop_drawing;
+
+    if(is_waiting_for_ending_effect) //the line completed effect
+    {
+        for (int i = 0; i < STAGE_HEIGHT; i++)
+        {
+            if(to_remove_lines[i] == 0) continue;
+
+            for (int j = 0; j < STAGE_WIDTH-2; j++)
+            {
+                stage[to_remove_lines[i]+j] = index_color_effect;
+            }
+        }
+
+        counterToShowCompletedLineEffect -= GetFrameTime();
+        index_color_effect = (index_color_effect + 1) % 8;
+        if(counterToShowCompletedLineEffect < 0)
+        {
+            is_waiting_for_ending_effect = false;
+            counterToShowCompletedLineEffect = timerToShowCompletedLineEffect;
+
+            for (int i = 0; i < STAGE_HEIGHT; i++)
+            {
+                if(to_remove_lines[i] == 0) continue;               
+                
+                memset(stage+to_remove_lines[i],0,(STAGE_WIDTH-2)* sizeof(int)); //set the whole line to 0
+
+                PushDownTetrominos(to_remove_lines[i]/STAGE_WIDTH -1); //y * STAGE_WIDTH + 1
+            }
+
+            memset(to_remove_lines,0,sizeof(to_remove_lines));
+
+        }
+        goto game_loop_drawing;
+    }
+
+    //ACTUAL GAME LOOP
+
+    counterToMoveTetrominoDown -= GetFrameTime();
+
+    if(IsKeyPressed(KEY_E))
+    {
+        //debug key for doubling points
+        AddScore(actual_score);
+    }
+
+    PlayerInputManager();
+
+    game_loop_drawing:
 
     BeginDrawing();
     ClearBackground(clear_color);
@@ -540,7 +606,7 @@ void GameLoop()
     DrawPlayerTetromino(tetrominoColors[currentColor], tetrominoTypes[currentTetrominoType][currentRotation]);
 
     if(is_game_paused) 
-        DrawText("GAME PAUSED", 0, WINDOW_HEIGHT/2, 40, YELLOW);
+        DrawText("GAME PAUSED", startOffsetX, WINDOW_HEIGHT/2, 40, YELLOW);
 
     EndDrawing();
 }
@@ -560,20 +626,26 @@ void GameOverLoop()
 
 }
 
+void SwitchScene(GameScene newScene)
+{
+    if(actual_game_scene && actual_game_scene->OnExit)actual_game_scene->OnExit();
+
+    actual_game_scene = &newScene;
+
+    if(actual_game_scene->OnEnter)actual_game_scene->OnEnter();
+}
+
 int main(int argc, char** argv)
 {
-    float timeToMoveTetrominoDown = actual_falling_speed;
-
     time_t unixTime;
     time(&unixTime);
     SetRandomSeed(unixTime);
-
-    SpawnNewPlayerTetromino();
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tetris In RayLib by Marco Baldini");
     
     InitAudioDevice();
 
+    //load audios
     sfx_hit_piece = LoadSound("assets/audio/hit.wav");
     sfx_line_completed = LoadSound("assets/audio/line_completed.wav");
 
@@ -582,24 +654,21 @@ int main(int argc, char** argv)
     music_gameover = LoadMusicStream("assets/music/game_over.wav");
     music_startmenu = LoadMusicStream("assets/music/start_menu.wav");
 
-    currentMusic = &music_ingame2;
-
-    PlayMusicStream(*currentMusic);
-
     SetTargetFPS(60);
 
+    //generate scenes
     maingame_Scene.Loop = GameLoop;
     maingame_Scene.OnEnter = GameLoopOnEnter;
     maingame_Scene.OnExit = GameLoopOnExit;
 
-    actual_game_scene = &maingame_Scene;
+    //load scene
+    actual_game_scene = NULL;
 
-    actual_game_scene->OnEnter();
+    SwitchScene(maingame_Scene);
 
     while(!WindowShouldClose())
     {
-        actual_game_scene->Loop();
-        
+        actual_game_scene->Loop();        
     }
 
     UnloadSound(sfx_hit_piece);     // Unload sound data
