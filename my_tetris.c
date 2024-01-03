@@ -3,7 +3,6 @@
 #include <my_tetris.h>
 #include <string.h>
 
-
 int stage[] = {
 1,0,0,0,0,0,0,0,0,0,0,1,
 1,0,0,0,0,0,0,0,0,0,0,1,
@@ -28,8 +27,6 @@ int stage[] = {
 1,0,0,0,0,0,0,0,0,0,0,1,
 1,1,1,1,1,1,1,1,1,1,1,1,
 };
-
-Color stageColors[STAGE_WIDTH*STAGE_HEIGHT];
 
 const int lTetromino0[] =
 {

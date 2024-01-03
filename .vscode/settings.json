@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "tetris.h": "c"
+        "tetris.h": "c",
+        "math.h": "c"
     }
 }

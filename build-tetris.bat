@@ -1,1 +1,1 @@
-clang.exe -o Tetris.exe .\Game.c .\CheckCollision.c .\Tetris.c -l .\raylibdll.lib -I .\includes
+clang.exe -o Tetris.exe .\Tetris.c .\Game.c .\CheckCollision.c -l .\raylibdll.lib -I .\includes
