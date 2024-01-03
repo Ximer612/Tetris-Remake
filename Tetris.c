@@ -4,6 +4,8 @@
 #include <Tetris.h>
 #include <math.h>
 
+#define CustomPrint(string,...) TraceLog(LOG_INFO, string, ##__VA_ARGS__);
+
 #pragma region stage & tetrominos
 int stage[] = 
 {
@@ -326,6 +328,22 @@ float counterToShowCompletedLineEffect;
 int to_remove_lines[STAGE_HEIGHT];
 int index_color_effect = 0;
 
+void SwitchScene(GameScene newScene)
+{
+    if(actual_game_scene && actual_game_scene->OnExit)
+    {
+        actual_game_scene->OnExit();
+    }
+
+    actual_game_scene = &newScene;
+
+    if(actual_game_scene->OnEnter)
+    {
+        actual_game_scene->OnEnter();
+    }
+
+}
+
 void DrawPlayerTetromino(const Color current_color, const int *tetromino)
 {
     for(int y = 0; y < TETROMINO_SIZE; y++)
@@ -439,8 +457,7 @@ void SpawnNewPlayerTetromino()
 
     if(CheckCollision(currentTetrominoX,currentTetrominoY,&currentTetrominoType))
     {
-        actual_game_scene->OnExit(); //the game now is in game over loop
-        TraceLog(LOG_INFO,"Game over!");
+        SwitchScene(gameover_Scene);
     }
 }
 
@@ -530,11 +547,6 @@ void GameLoopOnEnter()
     SpawnNewPlayerTetromino();
 }
 
-void GameLoopOnExit()
-{
-    actual_game_scene = &gameover_Scene;
-}
-
 void GameLoop()
 {
     UpdateMusicStream(*currentMusic);
@@ -611,29 +623,41 @@ void GameLoop()
     EndDrawing();
 }
 
-void GamePausedLoop()
-{
-
-}
-
-void GameIntroLoop()
+void GameStartMenuLoop()
 {
 
 }
 
 void GameOverLoop()
 {
+    UpdateMusicStream(*currentMusic);
 
+    if(IsKeyPressed(KEY_ENTER))
+    {
+        SwitchScene(maingame_Scene);
+    }
+
+    BeginDrawing();
+
+    ClearBackground(BLACK);
+
+                                        // - (words count * font size) / 2
+    DrawText("GAME OVER!", WINDOW_WIDTH/2 - 60, 10, 20, RED);
+    DrawText("PRESS [ENTER] TO CONTINUE! ", WINDOW_WIDTH/2 - 150, 30, 20, RED);
+    DrawText(TextFormat("Score: %08i", actual_score), 20, 70, 20, RED);
+    DrawText(TextFormat("Highscore: %08i", highscore), 20, 90, 20, GREEN);
+
+    EndDrawing();
 }
 
-void SwitchScene(GameScene newScene)
+void GameOverOnEnter()
 {
-    if(actual_game_scene && actual_game_scene->OnExit)actual_game_scene->OnExit();
+    if(actual_score > highscore) highscore = actual_score;
 
-    actual_game_scene = &newScene;
-
-    if(actual_game_scene->OnEnter)actual_game_scene->OnEnter();
+    currentMusic = &music_gameover;
+    PlayMusicStream(*currentMusic);
 }
+
 
 int main(int argc, char** argv)
 {
@@ -659,12 +683,16 @@ int main(int argc, char** argv)
     //generate scenes
     maingame_Scene.Loop = GameLoop;
     maingame_Scene.OnEnter = GameLoopOnEnter;
-    maingame_Scene.OnExit = GameLoopOnExit;
+    maingame_Scene.OnExit = NULL;
+
+    gameover_Scene.Loop = GameOverLoop;
+    gameover_Scene.OnEnter = GameOverOnEnter;
+    gameover_Scene.OnExit = NULL;
 
     //load scene
     actual_game_scene = NULL;
 
-    SwitchScene(maingame_Scene);
+    SwitchScene(gameover_Scene);
 
     while(!WindowShouldClose())
     {
