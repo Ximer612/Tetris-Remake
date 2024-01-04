@@ -1,0 +1,1 @@
+#define CustomPrint(string,...) TraceLog(LOG_INFO, string, ##__VA_ARGS__);

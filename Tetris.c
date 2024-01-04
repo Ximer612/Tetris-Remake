@@ -1,271 +1,12 @@
 #include <raylib.h>
 #include <time.h>
 #include <string.h>
+#define TETRIS_DEFINITIONS
 #include <Tetris.h>
 #include <math.h>
-
-#define CustomPrint(string,...) TraceLog(LOG_INFO, string, ##__VA_ARGS__);
-
-#pragma region stage & tetrominos
-int stage[] = 
-{
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-};
-
-// L
-
-const int lTetromino0[] =
-{
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 1, 1, 0,
-    0, 0, 0, 0,
-};
-
-const int lTetromino90[] =
-{
-    0, 0, 0, 0,
-    1, 1, 1, 0,
-    1, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int lTetromino180[] =
-{
-    1, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int lTetromino270[] =
-{
-    0, 0, 1, 0,
-    1, 1, 1, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-// J
-
-const int jTetromino0[] =
-{
-    0, 1, 1, 0,
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int jTetromino90[] =
-{
-    0, 0, 0, 0,
-    1, 1, 1, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 0,
-};
-
-const int jTetromino180[] =
-{
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-    1, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int jTetromino270[] =
-{
-    1, 0, 0, 0,
-    1, 1, 1, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-// O
-
-const int oTetromino[] =
-{
-    1, 1, 0, 0,
-    1, 1, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-// S
-
-const int sTetromino0[] =
-{
-    0, 1, 0, 0,
-    0, 1, 1, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 0,
-};
-
-const int sTetromino90[] =
-{
-    0, 0, 0, 0,
-    0, 1, 1, 0,
-    1, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int sTetromino180[] =
-{
-    1, 0, 0, 0,
-    1, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int sTetromino270[] =
-{
-    0, 1, 1, 0,
-    1, 1, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-// T
-
-const int tTetromino0[] =
-{
-    0, 0, 0, 0,
-    1, 1, 1, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int tTetromino90[] =
-{
-    0, 1, 0, 0,
-    1, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int tTetromino180[] =
-{
-    0, 1, 0, 0,
-    1, 1, 1, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int tTetromino270[] =
-{
-    0, 1, 0, 0,
-    0, 1, 1, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-// I
-
-const int iTetromino0[] =
-{
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-    0, 1, 0, 0,
-};
-
-const int iTetromino90[] =
-{
-    0, 0, 0, 0,
-    1, 1, 1, 1,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int iTetromino180[] =
-{
-    1, 0, 0, 0,
-    1, 0, 0, 0,
-    1, 0, 0, 0,
-    1, 0, 0, 0,
-};
-
-const int iTetromino270[] =
-{
-    1, 1, 1, 1,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-// Z
-
-const int zTetromino0[] =
-{
-    0, 0, 1, 0,
-    0, 1, 1, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int zTetromino90[] =
-{
-    0, 0, 0, 0,
-    1, 1, 0, 0,
-    0, 1, 1, 0,
-    0, 0, 0, 0,
-};
-
-const int zTetromino180[] =
-{
-    0, 1, 0, 0,
-    1, 1, 0, 0,
-    1, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-const int zTetromino270[] =
-{
-    1, 1, 0, 0,
-    0, 1, 1, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-};
-
-const Color tetrominoColors[8] =
-{
-    {200,200,200,255},{240,0,0,255},{0,240,0,255},{160,0,240,255},{240,240,0,255},{0,240,240,255},{0,0,240,255},{240,160,0,255}
-};
+#include <raylib_custom_functions.h>
 
 const Color clear_color = {40,40,40,255};
-
-const int *tetrominoTypes[7][4] =
-{
-    {zTetromino0, zTetromino90, zTetromino180, zTetromino270},
-    {sTetromino0, sTetromino90, sTetromino180, sTetromino270},
-    {tTetromino0, tTetromino90, tTetromino180, tTetromino270},
-    {oTetromino, oTetromino, oTetromino, oTetromino},
-    {iTetromino0, iTetromino90, iTetromino180, iTetromino270},
-    {jTetromino0, jTetromino90, jTetromino180, jTetromino270},
-    {lTetromino0, lTetromino90, lTetromino180, lTetromino270},
-};
-
-#pragma endregion
 
 //CONST VARIABLES
 const int startOffsetX = (WINDOW_WIDTH / 2) - ((STAGE_WIDTH * TILE_SIZE) / 2);
@@ -276,6 +17,7 @@ const int tetrominoStartY = 0;
 //GAME SCENES VARIABLES
 typedef struct{
 
+    char* scene_name;
     void (*OnEnter)();
     void (*Loop)();
     void (*OnExit)();
@@ -287,10 +29,9 @@ int is_waiting_for_ending_effect = 0;
 
 GameScene* actual_game_scene;
 
-GameScene gameover_Scene;
-GameScene maingame_Scene;
-GameScene startmenu_Scene;
-GameScene pause_Scene;
+GameScene gameover_scene;
+GameScene maingame_scene;
+GameScene startmenu_scene;
 
 Sound sfx_hit_piece;
 Sound sfx_line_completed;
@@ -328,14 +69,14 @@ float counterToShowCompletedLineEffect;
 int to_remove_lines[STAGE_HEIGHT];
 int index_color_effect = 0;
 
-void SwitchScene(GameScene newScene)
+void SwitchScene(GameScene* newScene)
 {
     if(actual_game_scene && actual_game_scene->OnExit)
     {
         actual_game_scene->OnExit();
     }
 
-    actual_game_scene = &newScene;
+    actual_game_scene = newScene;
 
     if(actual_game_scene->OnEnter)
     {
@@ -397,39 +138,6 @@ void PushDownTetrominos(int start_line_y)
     }   
 }
 
-int DeleteCompletedLines()
-{
-    int deleted_lines = 0;
- 
-    for (int y = 0; y < STAGE_HEIGHT - 1; y++)
-    {
-        int checkLine = 1;
-
-        for (int x = 1; x < STAGE_WIDTH - 1; x++)
-        {
-            const int offset = y * STAGE_WIDTH + x;
-
-            //if there is at least one 0 = this line isn't completed
-            if (stage[offset] == 0)
-            {
-                checkLine = 0;
-                break;
-            }
-        }
-
-        if(checkLine)
-        {
-            is_waiting_for_ending_effect = true;
-            PlaySound(sfx_line_completed);
-            const int offset = y * STAGE_WIDTH + 1; //offset of the first tetramino of the line
-            to_remove_lines[y] = offset;
-            deleted_lines++;
-        }
-    }   
-
-    return deleted_lines;
-}
-
 void AddScore(const int score_to_add)
 {
     actual_score +=score_to_add;
@@ -439,26 +147,6 @@ void AddScore(const int score_to_add)
     actual_falling_speed = MAX(actual_falling_speed,MIN_FALL_SPEED);
 
     float moveTetrominoDownTimer = actual_falling_speed;
-}
-
-void SpawnNewPlayerTetromino()
-{
-    currentTetrominoX = tetrominoStartX;
-    currentTetrominoY = tetrominoStartY;
-
-    do
-    {
-        currentTetrominoType = GetRandomValue(0, 6);
-    } while (currentTetrominoType == last_tetramino_type);
-    last_tetramino_type = currentTetrominoType;
-    
-    currentRotation = 0;
-    currentColor = currentTetrominoType+1;
-
-    if(CheckCollision(currentTetrominoX,currentTetrominoY,&currentTetrominoType))
-    {
-        SwitchScene(gameover_Scene);
-    }
 }
 
 void PlayerInputManager()
@@ -527,27 +215,33 @@ void PlayerInputManager()
             SetSoundPitch(sfx_hit_piece,GetRandomValue(5,150)*0.01f); // from 0.05f to 1.50f
             PlaySound(sfx_hit_piece);
 
-            const int deleted_lines = DeleteCompletedLines();
+            const int deleted_lines = DeleteCompletedLines(to_remove_lines);
             AddScore((deleted_lines * 1.5f) *LINE_POINTS);
-
             
-            SpawnNewPlayerTetromino();
+            if(SpawnNewPlayerTetromino(tetrominoStartX, tetrominoStartY, &currentTetrominoX, &currentTetrominoY, &currentTetrominoType, &last_tetramino_type, &currentRotation, &currentColor))
+            {
+                SwitchScene(&gameover_scene);
+            }
         }
     }
 }
 
-void GameLoopOnEnter()
+void MainGameOnEnter()
 {
+    memcpy(stage,stage_empty,sizeof(stage));
+
+    actual_score = 0;
+
     float timeToMoveTetrominoDown = actual_falling_speed;
     counterToShowCompletedLineEffect = timerToShowCompletedLineEffect;
 
     currentMusic = &music_ingame2;
     PlayMusicStream(*currentMusic);
 
-    SpawnNewPlayerTetromino();
+    SpawnNewPlayerTetromino(tetrominoStartX, tetrominoStartY, &currentTetrominoX, &currentTetrominoY, &currentTetrominoType, &last_tetramino_type, &currentRotation, &currentColor);
 }
 
-void GameLoop()
+void MainGameLoop()
 {
     UpdateMusicStream(*currentMusic);
 
@@ -592,6 +286,7 @@ void GameLoop()
         goto game_loop_drawing;
     }
 
+
     //ACTUAL GAME LOOP
 
     counterToMoveTetrominoDown -= GetFrameTime();
@@ -623,18 +318,14 @@ void GameLoop()
     EndDrawing();
 }
 
-void GameStartMenuLoop()
-{
-
-}
-
 void GameOverLoop()
 {
     UpdateMusicStream(*currentMusic);
 
     if(IsKeyPressed(KEY_ENTER))
     {
-        SwitchScene(maingame_Scene);
+        SwitchScene(&maingame_scene);
+        return;
     }
 
     BeginDrawing();
@@ -658,9 +349,36 @@ void GameOverOnEnter()
     PlayMusicStream(*currentMusic);
 }
 
+void StartMenuLoop()
+{
+    UpdateMusicStream(*currentMusic);
+
+    if(IsKeyPressed(KEY_ENTER))
+    {
+        SwitchScene(&maingame_scene);
+        return;
+    }
+
+    BeginDrawing();
+
+    ClearBackground(BLACK);
+                                        // - (words count * font size) / 2
+    DrawText("TETRIS IN RAYLIB!", WINDOW_WIDTH/2 - 100, 10, 20, YELLOW);
+    DrawText("PRESS [ENTER] TO START GAME! ", WINDOW_WIDTH/2 - 150, 30, 20, GREEN);
+    DrawText(TextFormat("Last Highscore: %08i", highscore), 20, 90, 20, PURPLE);
+
+    EndDrawing();
+}
+
+void StartMenuOnEnter()
+{
+    currentMusic = &music_startmenu;
+    PlayMusicStream(*currentMusic);
+}
 
 int main(int argc, char** argv)
 {
+    //init random to current time
     time_t unixTime;
     time(&unixTime);
     SetRandomSeed(unixTime);
@@ -669,34 +387,46 @@ int main(int argc, char** argv)
     
     InitAudioDevice();
 
-    //load audios
+    //load sfxs
     sfx_hit_piece = LoadSound("assets/audio/hit.wav");
     sfx_line_completed = LoadSound("assets/audio/line_completed.wav");
 
+    //load musics
     music_ingame1 = LoadMusicStream("assets/music/in_game1.wav");
+    SetMusicVolume(music_ingame1,0.3f);
     music_ingame2 = LoadMusicStream("assets/music/in_game2.wav");
+    SetMusicVolume(music_ingame2,0.3f);
     music_gameover = LoadMusicStream("assets/music/game_over.wav");
+    SetMusicVolume(music_gameover,0.3f);
     music_startmenu = LoadMusicStream("assets/music/start_menu.wav");
+    SetMusicVolume(music_startmenu,0.3f);
 
     SetTargetFPS(60);
 
     //generate scenes
-    maingame_Scene.Loop = GameLoop;
-    maingame_Scene.OnEnter = GameLoopOnEnter;
-    maingame_Scene.OnExit = NULL;
+    maingame_scene.Loop = MainGameLoop;
+    maingame_scene.OnEnter = MainGameOnEnter;
+    maingame_scene.OnExit = NULL;
+    maingame_scene.scene_name = "Main game";
 
-    gameover_Scene.Loop = GameOverLoop;
-    gameover_Scene.OnEnter = GameOverOnEnter;
-    gameover_Scene.OnExit = NULL;
+    gameover_scene.Loop = GameOverLoop;
+    gameover_scene.OnEnter = GameOverOnEnter;
+    gameover_scene.OnExit = NULL;
+    gameover_scene.scene_name = "Game over";
+
+    startmenu_scene.Loop = StartMenuLoop;
+    startmenu_scene.OnEnter = StartMenuOnEnter;
+    startmenu_scene.OnExit = NULL;
+    startmenu_scene.scene_name = "Start menu";
 
     //load scene
     actual_game_scene = NULL;
-
-    SwitchScene(gameover_Scene);
+    SwitchScene(&startmenu_scene);
 
     while(!WindowShouldClose())
     {
-        actual_game_scene->Loop();        
+        //CustomPrint(actual_game_scene->scene_name);
+        actual_game_scene->Loop();
     }
 
     UnloadSound(sfx_hit_piece);     // Unload sound data
