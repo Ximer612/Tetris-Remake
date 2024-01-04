@@ -12,6 +12,8 @@
 #define WINDOW_WIDTH    600
 #define WINDOW_HEIGHT   700
 
+#define SAVE_PATH "savegame.dat"
+
 #ifdef TETRIS_DEFINITIONS
 
 const Color tetrominoColors[8] =
@@ -296,8 +298,13 @@ const int *tetrominoTypes[7][4] =
 
 #endif //TETRIS_DEFINITIONS
 
+//TetrisLogic.c
 int CheckCollision(const int tetrominoStartX, const int tetrominoStartY, const int *tetromino);
 int SpawnNewPlayerTetromino(const int tetrominoStartX, const int tetrominoStartY, int* currentTetrominoX, int* currentTetrominoY,int* currentTetrominoType,int* last_tetramino_type, int* currentRotation, int* currentColor);
 int DeleteCompletedLines(int* to_remove_lines);
+void PushDownTetrominos(int start_line_y);
 
+//TetrisDraw.c
+void DrawPlayerTetromino(const Texture2D tetrominoTexture, const Color current_color, const int currentTetrominoX, const int currentTetrominoY, const int startOffsetX, const int startOffsetY, const int *tetromino);
+void DrawStageTetrominos(const Texture2D tetrominoTexture, const int currentTetrominoX, const int currentTetrominoY, const int startOffsetX, const int startOffsetY);
 

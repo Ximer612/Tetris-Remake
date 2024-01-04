@@ -1,12 +1,14 @@
 #include <raylib.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 #define TETRIS_DEFINITIONS
 #include <Tetris.h>
 #include <math.h>
 #include <raylib_custom_functions.h>
 
-const Color clear_color = {40,40,40,255};
+#define CLEARCOLOR  CLITERAL(Color){40,40,40,255}   // Background color for the game
+#define PAUSEPANELCOLOR  CLITERAL(Color){0,0,0,100}   // Color for the pause panel
 
 //CONST VARIABLES
 const int startOffsetX = (WINDOW_WIDTH / 2) - ((STAGE_WIDTH * TILE_SIZE) / 2);
@@ -33,6 +35,8 @@ GameScene gameover_scene;
 GameScene maingame_scene;
 GameScene startmenu_scene;
 
+//AUDIOS
+
 Sound sfx_hit_piece;
 Sound sfx_line_completed;
 Music music_ingame1;
@@ -42,10 +46,14 @@ Music music_startmenu;
 
 Music* currentMusic;
 
+//TEXTURES
+
+Texture2D tetrominoTexture;
+
 //PLAYER VARIABLES
 
 int actual_score;
-int highscore = 12345678;
+int highscore = 0;
 
 float actual_falling_speed = MAX_FALL_SPEED;
 
@@ -69,6 +77,7 @@ float counterToShowCompletedLineEffect;
 int to_remove_lines[STAGE_HEIGHT];
 int index_color_effect = 0;
 
+
 void SwitchScene(GameScene* newScene)
 {
     if(actual_game_scene && actual_game_scene->OnExit)
@@ -85,68 +94,17 @@ void SwitchScene(GameScene* newScene)
 
 }
 
-void DrawPlayerTetromino(const Color current_color, const int *tetromino)
-{
-    for(int y = 0; y < TETROMINO_SIZE; y++)
-    {
-        for(int x = 0; x < TETROMINO_SIZE; x++)
-        {
-            const int offset = y * TETROMINO_SIZE + x;
+void RecalculateFallingSpeed(){
 
-            if(tetromino[offset] == 1)
-            {
-                DrawRectangle((x + currentTetrominoX) * TILE_SIZE + startOffsetX, (y + currentTetrominoY) * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, current_color);
-            }
-        }
-    }
-}
-
-void DrawStageTetrominos()
-{
-    for(int y = 0; y < STAGE_HEIGHT; y++)
-    {
-        for(int x = 0; x < STAGE_WIDTH; x++)
-        {
-            const int offset = y * STAGE_WIDTH + x;
-            const int color = stage[offset];
-
-            if(stage[offset] != 0)
-            {
-                DrawRectangle(x * TILE_SIZE + startOffsetX, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, tetrominoColors[color-1]);
-            }
-
-            DrawRectangleLines(x * TILE_SIZE + startOffsetX, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, BLACK);
-        }
-    }
-}
-
-void PushDownTetrominos(int start_line_y)
-{
-    for (int y = start_line_y; y > 0; y--)
-    {
-        for (int x = 1; x < STAGE_WIDTH - 1; x++)
-        {
-            const int offset = y * STAGE_WIDTH + x;
-            const int offset_below = (y+1) * STAGE_WIDTH + x;
-
-            if (stage[offset_below] == 0 && stage[offset] > 0)
-            {
-                stage[offset_below] = stage[offset];
-                stage[offset] = 0;
-            }
-        }
-    }   
+    actual_falling_speed = MAX_FALL_SPEED - (actual_score * 0.0001f); 
+    actual_falling_speed = MIN(actual_falling_speed,MAX_FALL_SPEED);
+    actual_falling_speed = MAX(actual_falling_speed,MIN_FALL_SPEED);
 }
 
 void AddScore(const int score_to_add)
 {
     actual_score +=score_to_add;
-
-    actual_falling_speed = MAX_FALL_SPEED - (actual_score * 0.0001f); 
-    actual_falling_speed = MIN(actual_falling_speed,MAX_FALL_SPEED);
-    actual_falling_speed = MAX(actual_falling_speed,MIN_FALL_SPEED);
-
-    float moveTetrominoDownTimer = actual_falling_speed;
+    RecalculateFallingSpeed();
 }
 
 void PlayerInputManager()
@@ -154,7 +112,10 @@ void PlayerInputManager()
     if (IsKeyPressed(KEY_SPACE))
     {
         const int lastRotation = currentRotation;
+        const int lastCounterToMoveTetrominoDown = counterToMoveTetrominoDown;    
+
         currentRotation++;
+        counterToMoveTetrominoDown = counterToMoveTetrominoDown + GetFrameTime();
 
         if (currentRotation > 3)
         {
@@ -164,6 +125,7 @@ void PlayerInputManager()
         if (CheckCollision(currentTetrominoX,currentTetrominoY,tetrominoTypes[currentTetrominoType][currentRotation]))
         {
             currentRotation = lastRotation;
+            counterToMoveTetrominoDown = lastCounterToMoveTetrominoDown;
         }
     }
 
@@ -225,6 +187,7 @@ void PlayerInputManager()
         }
     }
 }
+
 
 void MainGameOnEnter()
 {
@@ -302,21 +265,37 @@ void MainGameLoop()
     game_loop_drawing:
 
     BeginDrawing();
-    ClearBackground(clear_color);
+    ClearBackground(CLEARCOLOR);
 
     DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, RED);
     DrawText(TextFormat("Highscore: %08i", highscore), 20, 30, 20, GREEN);
     DrawText(TextFormat("Vertical Speed: %.3f", (1 - actual_falling_speed) ), 20, 50, 20, YELLOW);
 
-    DrawStageTetrominos();
+    DrawStageTetrominos(tetrominoTexture,currentTetrominoX,currentTetrominoY,startOffsetX,startOffsetY);
 
-    DrawPlayerTetromino(tetrominoColors[currentColor], tetrominoTypes[currentTetrominoType][currentRotation]);
+    DrawPlayerTetromino(tetrominoTexture,tetrominoColors[currentColor],currentTetrominoX,currentTetrominoY,startOffsetX,startOffsetY, tetrominoTypes[currentTetrominoType][currentRotation]);
 
     if(is_game_paused) 
-        DrawText("GAME PAUSED", startOffsetX, WINDOW_HEIGHT/2, 40, YELLOW);
+    {
+        DrawRectangle(0,0,WINDOW_WIDTH,WINDOW_HEIGHT,PAUSEPANELCOLOR);
+        DrawText("GAME PAUSED", startOffsetX, WINDOW_HEIGHT/2-50, 40, YELLOW);
+        DrawText("Press [ESC] to quit!", startOffsetX-50, WINDOW_HEIGHT/2+50, 40, YELLOW);
+        DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, RED);
+
+    }
 
     EndDrawing();
 }
+
+void MainGameOnExit()
+{
+    if(actual_score > highscore)
+    {
+        highscore = actual_score;
+        SaveFileText(SAVE_PATH,(char*)TextFormat("%d",highscore));
+    } 
+}
+
 
 void GameOverLoop()
 {
@@ -331,7 +310,6 @@ void GameOverLoop()
     BeginDrawing();
 
     ClearBackground(BLACK);
-
                                         // - (words count * font size) / 2
     DrawText("GAME OVER!", WINDOW_WIDTH/2 - 60, 10, 20, RED);
     DrawText("PRESS [ENTER] TO CONTINUE! ", WINDOW_WIDTH/2 - 150, 30, 20, RED);
@@ -343,11 +321,10 @@ void GameOverLoop()
 
 void GameOverOnEnter()
 {
-    if(actual_score > highscore) highscore = actual_score;
-
     currentMusic = &music_gameover;
     PlayMusicStream(*currentMusic);
 }
+
 
 void StartMenuLoop()
 {
@@ -376,17 +353,12 @@ void StartMenuOnEnter()
     PlayMusicStream(*currentMusic);
 }
 
-int main(int argc, char** argv)
-{
-    //init random to current time
-    time_t unixTime;
-    time(&unixTime);
-    SetRandomSeed(unixTime);
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tetris In RayLib by Marco Baldini");
-    
+void LoadAudios()
+{
     InitAudioDevice();
 
+    //load assets
     //load sfxs
     sfx_hit_piece = LoadSound("assets/audio/hit.wav");
     sfx_line_completed = LoadSound("assets/audio/line_completed.wav");
@@ -400,13 +372,22 @@ int main(int argc, char** argv)
     SetMusicVolume(music_gameover,0.3f);
     music_startmenu = LoadMusicStream("assets/music/start_menu.wav");
     SetMusicVolume(music_startmenu,0.3f);
+}
 
-    SetTargetFPS(60);
+void LoadTextures()
+{
+    //load textures
+    tetrominoTexture = LoadTexture("assets/texture/tetrisPiece.png");
+    tetrominoTexture.width=TILE_SIZE;
+    tetrominoTexture.height=TILE_SIZE;
+}
 
+void InitScenes()
+{
     //generate scenes
     maingame_scene.Loop = MainGameLoop;
     maingame_scene.OnEnter = MainGameOnEnter;
-    maingame_scene.OnExit = NULL;
+    maingame_scene.OnExit = MainGameOnExit;
     maingame_scene.scene_name = "Main game";
 
     gameover_scene.Loop = GameOverLoop;
@@ -419,9 +400,36 @@ int main(int argc, char** argv)
     startmenu_scene.OnExit = NULL;
     startmenu_scene.scene_name = "Start menu";
 
+}
+
+int main(int argc, char** argv)
+{
+    //init random to current time
+    time_t unixTime;
+    time(&unixTime);
+    SetRandomSeed(unixTime);
+
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tetris In RayLib by Marco Baldini");
+
+    LoadAudios();
+    LoadTextures();
+    InitScenes();
+    
+    SetTargetFPS(60);
+
     //load scene
     actual_game_scene = NULL;
     SwitchScene(&startmenu_scene);
+
+    //load highscore
+    if(FileExists(SAVE_PATH))
+    {
+        char* text = LoadFileText(SAVE_PATH);
+        if(text)
+        {
+            highscore = atoi(text);
+        }
+    }
 
     while(!WindowShouldClose())
     {
