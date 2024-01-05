@@ -2,6 +2,10 @@
     "files.associations": {
         "tetris.h": "c",
         "math.h": "c",
-        "raylib_custom_functions.h": "c"
+        "raylib_custom_functions.h": "c",
+        "extra_colors.h": "c",
+        "raylib.h": "c",
+        "time.h": "c",
+        "game_settings.h": "c"
     }
 }

@@ -5,12 +5,13 @@
 #include <game_settings.h>
 
 extern Music* current_music;
-extern Music music_startmenu;
+extern Music music_gameover;
 extern GameScene maingame_scene;
 extern GameScene* actual_game_scene;
 extern int highscore;
+extern int actual_score;
 
-void StartMenuLoop()
+void GameOverLoop()
 {
     UpdateMusicStream(*current_music);
 
@@ -22,18 +23,18 @@ void StartMenuLoop()
 
     BeginDrawing();
 
-    ClearBackground(TETRIS_CYAN);
+    ClearBackground(TETRIS_DARKEST_GRAY);
                                         // - (words count * font size) / 2
-    DrawText("TETRIS IN RAYLIB!", WINDOW_WIDTH/2 - 200, 20, 40, TETRIS_BLUE_PURPLE);
-    DrawText("PRESS [ENTER] TO START GAME! ", WINDOW_WIDTH/2 - 200, WINDOW_HEIGHT/2, 20, TETRIS_YELLOW);
-    DrawText(TextFormat("Last Highscore: %08i", highscore), 20, 90, 20, TETRIS_LIGHT_GREEN);
+    DrawText("GAME OVER!", WINDOW_WIDTH/2 - 130, 20, 40, TETRIS_DARK_RED);
+    DrawText("PRESS [ENTER] TO CONTINUE! ", WINDOW_WIDTH/2 - 150, WINDOW_HEIGHT/2, 20, TETRIS_YELLOW);
+    DrawText(TextFormat("Last Score: %08i", actual_score), 20, 70, 20, TETRIS_BLUE_PURPLE);
+    DrawText(TextFormat("Highscore: %08i", highscore), 20, 90, 20, TETRIS_LIGHT_GREEN);
 
     EndDrawing();
 }
 
-void StartMenuOnEnter()
+void GameOverOnEnter()
 {
-    current_music = &music_startmenu;
+    current_music = &music_gameover;
     PlayMusicStream(*current_music);
-
 }

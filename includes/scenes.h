@@ -15,6 +15,13 @@ typedef struct{
 
 void SwitchScene(GameScene* newScene, GameScene** actual_game_scene2);
 
-//void StartMenuLoop();
-//void StartMenuOnEnter();
+void StartMenuLoop();
+void StartMenuOnEnter();
+
+void GameOverLoop();
+void GameOverOnEnter();
+
+void MainGameOnExit();
+void MainGameOnEnter();
+void MainGameLoop();
 

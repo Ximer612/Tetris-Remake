@@ -9,11 +9,6 @@
 #define DOWN_POINTS     10
 #define LINE_POINTS     200
 
-#define WINDOW_WIDTH    600
-#define WINDOW_HEIGHT   700
-
-#define SAVE_PATH "savegame.dat"
-
 #ifdef TETRIS_DEFINITIONS
 
 const Color tetrominoColors[8] =
