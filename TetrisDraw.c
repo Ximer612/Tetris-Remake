@@ -3,7 +3,7 @@
 
 extern int stage[];
 
-void DrawPlayerTetromino(const Texture2D tetrominoTexture, const Color current_color, const int currentTetrominoX, const int currentTetrominoY, const int startOffsetX, const int startOffsetY, const int *tetromino)
+void DrawPlayerTetromino(const Texture2D tetrominoTexture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int startOffsetY, const int *tetromino)
 {
     for(int y = 0; y < TETROMINO_SIZE; y++)
     {
@@ -13,16 +13,16 @@ void DrawPlayerTetromino(const Texture2D tetrominoTexture, const Color current_c
 
             if(tetromino[offset] == 1)
             {
-                DrawTexture(tetrominoTexture,(x + currentTetrominoX) * TILE_SIZE + startOffsetX, (y + currentTetrominoY) * TILE_SIZE + startOffsetY, current_color);
-                //DrawRectangle((x + currentTetrominoX) * TILE_SIZE + startOffsetX, (y + currentTetrominoY) * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, current_color);
+                DrawTexture(tetrominoTexture,(x + current_tetromino_x) * TILE_SIZE + start_offset_x, (y + current_tetromino_y) * TILE_SIZE + startOffsetY, current_color);
+                //DrawRectangle((x + current_tetromino_x) * TILE_SIZE + start_offset_x, (y + current_tetromino_y) * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, current_color);
             }
         }
     }
 }
 
-extern Color tetrominoColors[];
+extern Color tetromino_colors[];
 
-void DrawStageTetrominos(const Texture2D tetrominoTexture, const int currentTetrominoX, const int currentTetrominoY, const int startOffsetX, const int startOffsetY)
+void DrawStageTetrominos(const Texture2D tetrominoTexture, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int startOffsetY)
 {
     for(int y = 0; y < STAGE_HEIGHT; y++)
     {
@@ -33,11 +33,11 @@ void DrawStageTetrominos(const Texture2D tetrominoTexture, const int currentTetr
 
             if(stage[offset] != 0)
             {
-                DrawTexture(tetrominoTexture,x * TILE_SIZE + startOffsetX, y * TILE_SIZE + startOffsetY, tetrominoColors[color-1]);
-                //DrawRectangle(x * TILE_SIZE + startOffsetX, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, tetrominoColors[color-1]);
+                DrawTexture(tetrominoTexture,x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, tetromino_colors[color-1]);
+                //DrawRectangle(x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, tetromino_colors[color-1]);
             }
 
-            DrawRectangleLines(x * TILE_SIZE + startOffsetX, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, BLACK);
+            DrawRectangleLines(x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, BLACK);
         }
     }
 }

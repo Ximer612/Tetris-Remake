@@ -1,1 +1,1 @@
-clang.exe -o Tetris.exe .\Tetris.c .\TetrisLogic.c .\TetrisDraw.c .\scenes\ScenesFuncs.c .\scenes\StartMenu.c .\scenes\MainGame.c .\scenes\GameOver.c -l .\raylibdll.lib -I .\includes
+clang.exe -o Tetris.exe .\Tetris.c .\TetrisLogic.c .\TetrisDraw.c .\scenes\ScenesFuncs.c .\scenes\StartMenu.c .\scenes\GameLoop.c .\scenes\GameOver.c -l .\raylibdll.lib -I .\includes

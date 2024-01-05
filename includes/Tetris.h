@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <extra_colors.h>
 
 #define STAGE_WIDTH     12
 #define STAGE_HEIGHT    22
@@ -11,9 +12,9 @@
 
 #ifdef TETRIS_DEFINITIONS
 
-const Color tetrominoColors[8] =
+const Color tetromino_colors[8] =
 {
-    {200,200,200,255},{240,0,0,255},{0,240,0,255},{160,0,240,255},{240,240,0,255},{0,240,240,255},{0,0,240,255},{240,160,0,255}
+    TETROMINO_WHITE,TETROMINO_RED,TETROMINO_GREEN,TETROMINO_PURPLE,TETROMINO_YELLOW,TETROMINO_CYAN,TETROMINO_BLUE,TETROMINO_ORANGE
 };
 
 int stage[] = 
@@ -280,7 +281,7 @@ const int zTetromino270[] =
     0, 0, 0, 0,
 };
 
-const int *tetrominoTypes[7][4] =
+const int *tetromino_types[7][4] =
 {
     {zTetromino0, zTetromino90, zTetromino180, zTetromino270},
     {sTetromino0, sTetromino90, sTetromino180, sTetromino270},
@@ -294,12 +295,12 @@ const int *tetrominoTypes[7][4] =
 #endif //TETRIS_DEFINITIONS
 
 //TetrisLogic.c
-int CheckCollision(const int tetrominoStartX, const int tetrominoStartY, const int *tetromino);
-int SpawnNewPlayerTetromino(const int tetrominoStartX, const int tetrominoStartY, int* currentTetrominoX, int* currentTetrominoY,int* currentTetrominoType,int* last_tetramino_type, int* currentRotation, int* currentColor);
+int CheckCollision(const int tetromino_start_x, const int tetromino_start_y, const int *tetromino);
+int SpawnNewPlayerTetromino(const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color);
 int DeleteCompletedLines(int* to_remove_lines);
 void PushDownTetrominos(int start_line_y);
 
 //TetrisDraw.c
-void DrawPlayerTetromino(const Texture2D tetrominoTexture, const Color current_color, const int currentTetrominoX, const int currentTetrominoY, const int startOffsetX, const int startOffsetY, const int *tetromino);
-void DrawStageTetrominos(const Texture2D tetrominoTexture, const int currentTetrominoX, const int currentTetrominoY, const int startOffsetX, const int startOffsetY);
+void DrawPlayerTetromino(const Texture2D tetromino_texture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y, const int *tetromino);
+void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y);
 

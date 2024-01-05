@@ -2,9 +2,9 @@
 #include <raylib_custom_functions.h>
 
 extern int stage[];
-extern int tetrominoTypes[];
+extern int tetromino_types[];
 
-int CheckCollision(const int currentTetrominoX, const int currentTetrominoY, const int *tetromino)
+int CheckCollision(const int current_tetromino_x, const int current_tetromino_y, const int *tetromino)
 {
     for(int y = 0; y < TETROMINO_SIZE; y++)
     {
@@ -14,7 +14,7 @@ int CheckCollision(const int currentTetrominoX, const int currentTetrominoY, con
 
             if(tetromino[offset] == 1)
             {
-                const int offset_stage = (y + currentTetrominoY) * STAGE_WIDTH + (x +currentTetrominoX);
+                const int offset_stage = (y + current_tetromino_y) * STAGE_WIDTH + (x +current_tetromino_x);
 
                 if (stage[offset_stage] != 0)
                 {
@@ -35,21 +35,21 @@ const int filledTetromino[]=
     1,1,1,1,
 };
 
-int SpawnNewPlayerTetromino(const int tetrominoStartX, const int tetrominoStartY, int* currentTetrominoX, int* currentTetrominoY,int* currentTetrominoType,int* last_tetramino_type, int* currentRotation, int* currentColor)
+int SpawnNewPlayerTetromino(const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color)
 {
-    *currentTetrominoX = tetrominoStartX;
-    *currentTetrominoY = tetrominoStartY;
+    *current_tetromino_x = tetromino_start_x;
+    *current_tetromino_y = tetromino_start_y;
 
     do
     {
-        *currentTetrominoType = GetRandomValue(0, 6);
-    } while (*currentTetrominoType == *last_tetramino_type);
-    *last_tetramino_type = *currentTetrominoType;
+        *current_tetromino_type = GetRandomValue(0, 6);
+    } while (*current_tetromino_type == *last_tetramino_type);
+    *last_tetramino_type = *current_tetromino_type;
     
-    *currentRotation = 0;
-    *currentColor = *currentTetrominoType+1;
+    *current_rotation = 0;
+    *current_player_color = *current_tetromino_type+1;
 
-    if(CheckCollision(*currentTetrominoX,*currentTetrominoY,filledTetromino))
+    if(CheckCollision(*current_tetromino_x,*current_tetromino_y,filledTetromino))
     {
         return -1;
     }    

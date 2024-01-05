@@ -4,6 +4,7 @@
 #include <extra_colors.h>
 #include <game_settings.h>
 
+extern Sound sfx_explosion;
 extern Music* current_music;
 extern Music music_gameover;
 extern GameScene maingame_scene;
@@ -37,4 +38,6 @@ void GameOverOnEnter()
 {
     current_music = &music_gameover;
     PlayMusicStream(*current_music);
+
+    PlaySound(sfx_explosion);
 }

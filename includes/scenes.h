@@ -11,10 +11,12 @@ typedef struct{
 
 } GameScene;
 
-#endif
 
 void SwitchScene(GameScene* newScene, GameScene** actual_game_scene2);
 
+#endif
+
+void StartMenuOnExit();
 void StartMenuLoop();
 void StartMenuOnEnter();
 
@@ -24,4 +26,3 @@ void GameOverOnEnter();
 void MainGameOnExit();
 void MainGameOnEnter();
 void MainGameLoop();
-

@@ -16,6 +16,10 @@ GameScene startmenu_scene;
 //AUDIOS
 Sound sfx_hit_piece;
 Sound sfx_line_completed;
+Sound sfx_explosion;
+Sound sfx_move_tetromino;
+Sound sfx_rotate_tetromino;
+Sound sfx_start_game;
 
 Music music_ingame1;
 Music music_ingame2;
@@ -39,16 +43,22 @@ void LoadAudios()
     //load sfxs
     sfx_hit_piece = LoadSound("assets/audio/hit.wav");
     sfx_line_completed = LoadSound("assets/audio/line_completed.wav");
+    sfx_explosion = LoadSound("assets/audio/explosion.wav");
+    sfx_move_tetromino = LoadSound("assets/audio/move_tetromino.wav");
+    SetSoundVolume(sfx_move_tetromino,0.2f);
+    sfx_start_game = LoadSound("assets/audio/start_game.wav");
+    sfx_rotate_tetromino = LoadSound("assets/audio/rotate_tetromino.wav");
+    SetSoundVolume(sfx_rotate_tetromino,0.3f);
 
     //load musics
     music_ingame1 = LoadMusicStream("assets/music/in_game1.wav");
-    SetMusicVolume(music_ingame1,0.3f);
+    SetMusicVolume(music_ingame1,0.4f);
     music_ingame2 = LoadMusicStream("assets/music/in_game2.wav");
-    SetMusicVolume(music_ingame2,0.3f);
+    SetMusicVolume(music_ingame2,0.4f);
     music_gameover = LoadMusicStream("assets/music/game_over.wav");
-    SetMusicVolume(music_gameover,0.3f);
+    SetMusicVolume(music_gameover,0.4f);
     music_startmenu = LoadMusicStream("assets/music/start_menu.wav");
-    SetMusicVolume(music_startmenu,0.3f);
+    SetMusicVolume(music_startmenu,0.4f);
 }
 
 void LoadTextures()
@@ -72,9 +82,8 @@ void InitScenes()
 
     startmenu_scene.Loop = StartMenuLoop;
     startmenu_scene.OnEnter = StartMenuOnEnter;
-    startmenu_scene.OnExit = NULL;
+    startmenu_scene.OnExit = StartMenuOnExit;
     startmenu_scene.scene_name = "Start menu";
-
 }
 
 int main(int argc, char** argv)
