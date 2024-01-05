@@ -3,12 +3,11 @@
 #include <string.h>
 #include <stdlib.h>
 #define TETRIS_DEFINITIONS
-#include <Tetris.h>
+#include <tetris.h>
 #include <math.h>
 #include <raylib_custom_functions.h>
-
-#define CLEARCOLOR  CLITERAL(Color){40,40,40,255}   // Background color for the game
-#define PAUSEPANELCOLOR  CLITERAL(Color){0,0,0,100}   // Color for the pause panel
+#include <extra_colors.h>
+#include <scenes.h>
 
 //CONST VARIABLES
 const int startOffsetX = (WINDOW_WIDTH / 2) - ((STAGE_WIDTH * TILE_SIZE) / 2);
@@ -17,14 +16,6 @@ const int tetrominoStartX = STAGE_WIDTH / 2 - 2;
 const int tetrominoStartY = 0;
 
 //GAME SCENES VARIABLES
-typedef struct{
-
-    char* scene_name;
-    void (*OnEnter)();
-    void (*Loop)();
-    void (*OnExit)();
-
-} GameScene;
 
 int is_game_paused = 0;
 int is_waiting_for_ending_effect = 0;
@@ -44,7 +35,7 @@ Music music_ingame2;
 Music music_gameover;
 Music music_startmenu;
 
-Music* currentMusic;
+Music* current_music;
 
 //TEXTURES
 
@@ -76,23 +67,6 @@ float counterToShowCompletedLineEffect;
 
 int to_remove_lines[STAGE_HEIGHT];
 int index_color_effect = 0;
-
-
-void SwitchScene(GameScene* newScene)
-{
-    if(actual_game_scene && actual_game_scene->OnExit)
-    {
-        actual_game_scene->OnExit();
-    }
-
-    actual_game_scene = newScene;
-
-    if(actual_game_scene->OnEnter)
-    {
-        actual_game_scene->OnEnter();
-    }
-
-}
 
 void RecalculateFallingSpeed(){
 
@@ -182,7 +156,7 @@ void PlayerInputManager()
             
             if(SpawnNewPlayerTetromino(tetrominoStartX, tetrominoStartY, &currentTetrominoX, &currentTetrominoY, &currentTetrominoType, &last_tetramino_type, &currentRotation, &currentColor))
             {
-                SwitchScene(&gameover_scene);
+                SwitchScene(&gameover_scene,&actual_game_scene);
             }
         }
     }
@@ -198,15 +172,15 @@ void MainGameOnEnter()
     float timeToMoveTetrominoDown = actual_falling_speed;
     counterToShowCompletedLineEffect = timerToShowCompletedLineEffect;
 
-    currentMusic = &music_ingame2;
-    PlayMusicStream(*currentMusic);
+    current_music = &music_ingame2;
+    PlayMusicStream(*current_music);
 
     SpawnNewPlayerTetromino(tetrominoStartX, tetrominoStartY, &currentTetrominoX, &currentTetrominoY, &currentTetrominoType, &last_tetramino_type, &currentRotation, &currentColor);
 }
 
 void MainGameLoop()
 {
-    UpdateMusicStream(*currentMusic);
+    UpdateMusicStream(*current_music);
 
     if(IsKeyPressed(KEY_P))
     {
@@ -265,11 +239,11 @@ void MainGameLoop()
     game_loop_drawing:
 
     BeginDrawing();
-    ClearBackground(CLEARCOLOR);
+    ClearBackground(TETRIS_GRAY);
 
-    DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, RED);
-    DrawText(TextFormat("Highscore: %08i", highscore), 20, 30, 20, GREEN);
-    DrawText(TextFormat("Vertical Speed: %.3f", (1 - actual_falling_speed) ), 20, 50, 20, YELLOW);
+    DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, TETRIS_BLUE_PURPLE);
+    DrawText(TextFormat("Highscore: %08i", highscore), 20, 30, 20, TETRIS_LIGHT_GREEN);
+    DrawText(TextFormat("Vertical Speed: %.3f", (1 - actual_falling_speed) ), 20, 50, 20, TETRIS_YELLOW);
 
     DrawStageTetrominos(tetrominoTexture,currentTetrominoX,currentTetrominoY,startOffsetX,startOffsetY);
 
@@ -277,10 +251,9 @@ void MainGameLoop()
 
     if(is_game_paused) 
     {
-        DrawRectangle(0,0,WINDOW_WIDTH,WINDOW_HEIGHT,PAUSEPANELCOLOR);
-        DrawText("GAME PAUSED", startOffsetX, WINDOW_HEIGHT/2-50, 40, YELLOW);
-        DrawText("Press [ESC] to quit!", startOffsetX-50, WINDOW_HEIGHT/2+50, 40, YELLOW);
-        DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, RED);
+        DrawRectangle(0,0,WINDOW_WIDTH,WINDOW_HEIGHT,TETRIS_BLACK_OPAQUE);
+        DrawText("GAME PAUSED", startOffsetX, WINDOW_HEIGHT/2-50, 40, TETRIS_YELLOW);
+        DrawText("Press [ESC] to quit!", startOffsetX-50, WINDOW_HEIGHT/2+20, 40, TETRIS_DARK_RED);
 
     }
 
@@ -296,61 +269,60 @@ void MainGameOnExit()
     } 
 }
 
+void StartMenuOnEnter()
+{
+    current_music = &music_startmenu;
+    PlayMusicStream(*current_music);
+
+}
 
 void GameOverLoop()
 {
-    UpdateMusicStream(*currentMusic);
+    UpdateMusicStream(*current_music);
 
     if(IsKeyPressed(KEY_ENTER))
     {
-        SwitchScene(&maingame_scene);
+        SwitchScene(&maingame_scene,&actual_game_scene);
         return;
     }
 
     BeginDrawing();
 
-    ClearBackground(BLACK);
+    ClearBackground(TETRIS_DARKEST_GRAY);
                                         // - (words count * font size) / 2
-    DrawText("GAME OVER!", WINDOW_WIDTH/2 - 60, 10, 20, RED);
-    DrawText("PRESS [ENTER] TO CONTINUE! ", WINDOW_WIDTH/2 - 150, 30, 20, RED);
-    DrawText(TextFormat("Score: %08i", actual_score), 20, 70, 20, RED);
-    DrawText(TextFormat("Highscore: %08i", highscore), 20, 90, 20, GREEN);
+    DrawText("GAME OVER!", WINDOW_WIDTH/2 - 130, 20, 40, TETRIS_DARK_RED);
+    DrawText("PRESS [ENTER] TO CONTINUE! ", WINDOW_WIDTH/2 - 150, WINDOW_HEIGHT/2, 20, TETRIS_YELLOW);
+    DrawText(TextFormat("Last Score: %08i", actual_score), 20, 70, 20, TETRIS_BLUE_PURPLE);
+    DrawText(TextFormat("Highscore: %08i", highscore), 20, 90, 20, TETRIS_LIGHT_GREEN);
 
     EndDrawing();
 }
 
 void GameOverOnEnter()
 {
-    currentMusic = &music_gameover;
-    PlayMusicStream(*currentMusic);
+    current_music = &music_gameover;
+    PlayMusicStream(*current_music);
 }
-
 
 void StartMenuLoop()
 {
-    UpdateMusicStream(*currentMusic);
+    UpdateMusicStream(*current_music);
 
     if(IsKeyPressed(KEY_ENTER))
     {
-        SwitchScene(&maingame_scene);
+        SwitchScene(&maingame_scene,&actual_game_scene);
         return;
     }
 
     BeginDrawing();
 
-    ClearBackground(BLACK);
+    ClearBackground(TETRIS_CYAN);
                                         // - (words count * font size) / 2
-    DrawText("TETRIS IN RAYLIB!", WINDOW_WIDTH/2 - 100, 10, 20, YELLOW);
-    DrawText("PRESS [ENTER] TO START GAME! ", WINDOW_WIDTH/2 - 150, 30, 20, GREEN);
-    DrawText(TextFormat("Last Highscore: %08i", highscore), 20, 90, 20, PURPLE);
+    DrawText("TETRIS IN RAYLIB!", WINDOW_WIDTH/2 - 200, 20, 40, TETRIS_BLUE_PURPLE);
+    DrawText("PRESS [ENTER] TO START GAME! ", WINDOW_WIDTH/2 - 200, WINDOW_HEIGHT/2, 20, TETRIS_YELLOW);
+    DrawText(TextFormat("Last Highscore: %08i", highscore), 20, 90, 20, TETRIS_LIGHT_GREEN);
 
     EndDrawing();
-}
-
-void StartMenuOnEnter()
-{
-    currentMusic = &music_startmenu;
-    PlayMusicStream(*currentMusic);
 }
 
 
@@ -402,6 +374,8 @@ void InitScenes()
 
 }
 
+
+
 int main(int argc, char** argv)
 {
     //init random to current time
@@ -419,9 +393,10 @@ int main(int argc, char** argv)
 
     //load scene
     actual_game_scene = NULL;
-    SwitchScene(&startmenu_scene);
 
-    //load highscore
+    SwitchScene(&startmenu_scene,&actual_game_scene);
+
+    //load file with highscore
     if(FileExists(SAVE_PATH))
     {
         char* text = LoadFileText(SAVE_PATH);
@@ -433,7 +408,6 @@ int main(int argc, char** argv)
 
     while(!WindowShouldClose())
     {
-        //CustomPrint(actual_game_scene->scene_name);
         actual_game_scene->Loop();
     }
 

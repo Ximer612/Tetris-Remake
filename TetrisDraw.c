@@ -1,5 +1,5 @@
 #include <raylib.h>
-#include <Tetris.h>
+#include <tetris.h>
 
 extern int stage[];
 

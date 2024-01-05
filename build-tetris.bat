@@ -1,1 +1,1 @@
-clang.exe -o Tetris.exe .\Tetris.c .\TetrisLogic.c .\TetrisDraw.c -l .\raylibdll.lib -I .\includes
+clang.exe -o Tetris.exe .\Tetris.c .\TetrisLogic.c .\TetrisDraw.c .\scenes\ScenesFuncs.c -l .\raylibdll.lib -I .\includes

@@ -1,6 +1,8 @@
-#include <Tetris.h>
+#include <tetris.h>
+#include <raylib_custom_functions.h>
 
 extern int stage[];
+extern int tetrominoTypes[];
 
 int CheckCollision(const int currentTetrominoX, const int currentTetrominoY, const int *tetromino)
 {
@@ -25,6 +27,14 @@ int CheckCollision(const int currentTetrominoX, const int currentTetrominoY, con
     return 0;
 }
 
+const int filledTetromino[]=
+{
+    1,1,1,1,
+    1,1,1,1,
+    1,1,1,1,
+    1,1,1,1,
+};
+
 int SpawnNewPlayerTetromino(const int tetrominoStartX, const int tetrominoStartY, int* currentTetrominoX, int* currentTetrominoY,int* currentTetrominoType,int* last_tetramino_type, int* currentRotation, int* currentColor)
 {
     *currentTetrominoX = tetrominoStartX;
@@ -39,10 +49,11 @@ int SpawnNewPlayerTetromino(const int tetrominoStartX, const int tetrominoStartY
     *currentRotation = 0;
     *currentColor = *currentTetrominoType+1;
 
-    if(CheckCollision(*currentTetrominoX,*currentTetrominoY,currentTetrominoType))
+    if(CheckCollision(*currentTetrominoX,*currentTetrominoY,filledTetromino))
     {
         return -1;
-    }
+    }    
+
     return 0;
 }
 
