@@ -1,5 +1,7 @@
 #include <tetris.h>
 #include <raylib_custom_functions.h>
+#include <singly_linked.h>
+#include <stdlib.h>
 
 extern int stage[];
 extern int tetromino_types[];
@@ -35,17 +37,19 @@ const int filledTetromino[]=
     1,1,1,1,
 };
 
-int SpawnNewPlayerTetromino(const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color)
+int SpawnNewPlayerTetromino(int_singly_list_item** next_tetrominos, const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color)
 {
     *current_tetromino_x = tetromino_start_x;
     *current_tetromino_y = tetromino_start_y;
 
-    do
-    {
-        *current_tetromino_type = GetRandomValue(0, 6);
-    } while (*current_tetromino_type == *last_tetramino_type);
-    *last_tetramino_type = *current_tetromino_type;
-    
+    const int num_of_next_pieces = (*next_tetrominos)->list_item.count;
+
+    singly_list_item* popped_item = list_pop((singly_list_item**)next_tetrominos);
+    *current_tetromino_type = ((int_singly_list_item*)popped_item)->value;
+    free(popped_item);
+
+    SetNextPieces(next_tetrominos,num_of_next_pieces);
+
     *current_rotation = 0;
     *current_player_color = *current_tetromino_type+1;
 
@@ -55,6 +59,30 @@ int SpawnNewPlayerTetromino(const int tetromino_start_x, const int tetromino_sta
     }    
 
     return 0;
+}
+
+extern int last_tetramino_type;
+
+void SetNextPieces(int_singly_list_item** next_tetrominos, const int num_of_next_pieces)
+{    
+    int_singly_list_item* next_tetromino;
+
+    do
+    {
+        next_tetromino = TO_INT_LIST( malloc(sizeof(int_singly_list_item)) );
+
+        do
+        {
+            next_tetromino->value = GetRandomValue(0, 6);
+        } while (next_tetromino->value == last_tetramino_type);
+
+        last_tetramino_type = next_tetromino->value;
+        
+        list_append(TO_GENERIC_SINGLY_LIST_POINTER(next_tetrominos),&(*next_tetromino).list_item);
+    }
+    while ((*next_tetrominos)->list_item.count < num_of_next_pieces);
+
+    return;
 }
 
 extern Sound sfx_line_completed;

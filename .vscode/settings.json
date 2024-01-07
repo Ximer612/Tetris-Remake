@@ -6,6 +6,8 @@
         "extra_colors.h": "c",
         "raylib.h": "c",
         "time.h": "c",
-        "game_settings.h": "c"
+        "game_settings.h": "c",
+        "singly_linked.h": "c",
+        "console_utilities.h": "c"
     }
 }

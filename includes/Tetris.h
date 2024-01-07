@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <extra_colors.h>
+#include <singly_linked.h>
 
 #define STAGE_WIDTH     12
 #define STAGE_HEIGHT    22
@@ -139,8 +140,8 @@ const int jTetromino270[] =
 
 const int oTetromino[] =
 {
-    1, 1, 0, 0,
-    1, 1, 0, 0,
+    0, 1, 1, 0,
+    0, 1, 1, 0,
     0, 0, 0, 0,
     0, 0, 0, 0,
 };
@@ -296,11 +297,12 @@ const int *tetromino_types[7][4] =
 
 //TetrisLogic.c
 int CheckCollision(const int tetromino_start_x, const int tetromino_start_y, const int *tetromino);
-int SpawnNewPlayerTetromino(const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color);
+int SpawnNewPlayerTetromino(int_singly_list_item** next_tetrominos, const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color);
 int DeleteCompletedLines(int* to_remove_lines);
 void PushDownTetrominos(int start_line_y);
+void SetNextPieces(int_singly_list_item** next_tetrominos, const int num_of_next_pieces);
 
 //TetrisDraw.c
-void DrawPlayerTetromino(const Texture2D tetromino_texture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y, const int *tetromino);
+void DrawTetromino(const Texture2D tetromino_texture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y, const int *tetromino);
 void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y);
-
+void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y);

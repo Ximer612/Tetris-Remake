@@ -7,7 +7,10 @@
 #include <math.h>
 #include <game_settings.h>
 #include <raylib_custom_functions.h>
+#include <stdlib.h>
+#include <singly_linked.h>
 
+//EXTERN VARIABLES
 extern Music* current_music;
 extern Music music_ingame2;
 extern Sound sfx_hit_piece;
@@ -24,10 +27,14 @@ const int start_offset_x = (WINDOW_WIDTH / 2) - ((STAGE_WIDTH * TILE_SIZE) / 2);
 const int start_offset_y = (WINDOW_HEIGHT / 2) - ((STAGE_HEIGHT * TILE_SIZE) / 2);
 const int tetromino_start_x = STAGE_WIDTH / 2 - 2;
 const int tetromino_start_y = 0;
+const int next_tetromino_start_x = WINDOW_WIDTH-130;
+const int next_tetromino_start_y = 50;
 
+//GAME VARIABLES
 int is_game_paused = 0;
 int is_waiting_for_ending_effect = 0;
 
+//PLAYER VARIABLES
 float actual_falling_speed = MAX_FALL_SPEED;
 
 int current_player_color;
@@ -37,6 +44,10 @@ int current_tetromino_x;
 int current_tetromino_y;
 int last_tetramino_type = -1;
 
+//const int num_of_next_pieces = 4;
+#define num_of_next_pieces 5
+int_singly_list_item* next_tetrominos;
+
 //TIMERS
 float counter_to_move_tetromino_down;
 
@@ -45,7 +56,7 @@ float counter_to_move_tetromino_down;
 float counter_to_show_completed_line_effect = timer_to_show_completed_line_effect;
 
 //const float timer_to_continuous_movement = 0.2f;
-#define timer_to_continuous_movement 0.2f
+#define timer_to_continuous_movement 0.1f
 float counter_to_continuous_movement = timer_to_continuous_movement;
 
 //EFFECT VARIABLES
@@ -58,7 +69,7 @@ void MainGameOnExit()
     {
         highscore = actual_score;
         SaveFileText(SAVE_PATH,(char*)TextFormat("%d",highscore));
-    } 
+    }
 }
 
 void MainGameOnEnter()
@@ -73,7 +84,15 @@ void MainGameOnEnter()
     current_music = &music_ingame2;
     PlayMusicStream(*current_music);
 
-    SpawnNewPlayerTetromino(tetromino_start_x, tetromino_start_y, &current_tetromino_x, &current_tetromino_y, &current_tetromino_type, &last_tetramino_type, &current_rotation, &current_player_color);
+    //generate next pieces
+
+    if(next_tetrominos) free(next_tetrominos);
+
+    next_tetrominos = NULL;
+
+    SetNextPieces(&next_tetrominos,num_of_next_pieces);
+
+    SpawnNewPlayerTetromino(&next_tetrominos,tetromino_start_x, tetromino_start_y, &current_tetromino_x, &current_tetromino_y, &current_tetromino_type, &last_tetramino_type, &current_rotation, &current_player_color);
 }
 
 void RecalculateFallingSpeed()
@@ -219,7 +238,7 @@ void PlayerInputManager()
             const int deleted_lines = DeleteCompletedLines(to_remove_lines);
             AddScore((deleted_lines * 1.5f) *LINE_POINTS);
             
-            if(SpawnNewPlayerTetromino(tetromino_start_x, tetromino_start_y, &current_tetromino_x, &current_tetromino_y, &current_tetromino_type, &last_tetramino_type, &current_rotation, &current_player_color))
+            if(SpawnNewPlayerTetromino(&next_tetrominos,tetromino_start_x, tetromino_start_y, &current_tetromino_x, &current_tetromino_y, &current_tetromino_type, &last_tetramino_type, &current_rotation, &current_player_color))
             {
                 SwitchScene(&gameover_scene,&actual_game_scene);
             }
@@ -295,15 +314,15 @@ void MainGameLoop()
     DrawText(TextFormat("Vertical Speed: %.3f", (1 - actual_falling_speed) ), 20, 50, 20, TETRIS_YELLOW);
 
     DrawStageTetrominos(tetromino_texture,current_tetromino_x,current_tetromino_y,start_offset_x,start_offset_y);
-
-    DrawPlayerTetromino(tetromino_texture,tetromino_colors[current_player_color],current_tetromino_x,current_tetromino_y,start_offset_x,start_offset_y, tetromino_types[current_tetromino_type][current_rotation]);
+    DrawText("Next tetrominos:", next_tetromino_start_x-50, next_tetromino_start_y-30, 20, TETRIS_DARK_RED);
+    DrawNextPieces(next_tetrominos,tetromino_texture,next_tetromino_start_x,next_tetromino_start_y);
+    DrawTetromino(tetromino_texture,tetromino_colors[current_player_color],current_tetromino_x,current_tetromino_y,start_offset_x,start_offset_y, tetromino_types[current_tetromino_type][current_rotation]);
 
     if(is_game_paused) 
     {
         DrawRectangle(0,0,WINDOW_WIDTH,WINDOW_HEIGHT,TETRIS_BLACK_OPAQUE);
         DrawText("GAME PAUSED", start_offset_x, WINDOW_HEIGHT/2-50, 40, TETRIS_YELLOW);
         DrawText("Press [ESC] to quit!", start_offset_x-50, WINDOW_HEIGHT/2+20, 40, TETRIS_DARK_RED);
-
     }
 
     EndDrawing();
