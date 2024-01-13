@@ -121,13 +121,8 @@ void PlayerInputManager()
         const int last_rotation = current_rotation;
         const int last_counter_to_move_tetromino_down = counter_to_move_tetromino_down;    
 
-        current_rotation++;
+        current_rotation = (current_rotation + 1) % 4;
         counter_to_move_tetromino_down = counter_to_move_tetromino_down + GetFrameTime();
-
-        if (current_rotation > 3)
-        {
-            current_rotation = 0;
-        }
 
         if (CheckCollision(current_tetromino_x,current_tetromino_y,tetromino_types[current_tetromino_type][current_rotation]))
         {
@@ -246,69 +241,46 @@ void PlayerInputManager()
     }
 }
 
-void MainGameLoop()
+int ManageCompletedLineEffect()
 {
-    UpdateMusicStream(*current_music);
-
-    if(IsKeyPressed(KEY_P))
-    {
-        is_game_paused = !is_game_paused;
-    }
-
-    if(is_game_paused) goto game_loop_drawing;
-
     if(is_waiting_for_ending_effect) //the line completed effect
-    {
-        for (int i = 0; i < STAGE_HEIGHT; i++)
         {
-            if(to_remove_lines[i] == 0) continue;
-
-            for (int j = 0; j < STAGE_WIDTH-2; j++)
-            {
-                stage[to_remove_lines[i]+j] = index_color_effect;
-            }
-        }
-
-        counter_to_show_completed_line_effect -= GetFrameTime();
-        index_color_effect = (index_color_effect + 1) % 8;
-        if(counter_to_show_completed_line_effect < 0)
-        {
-            is_waiting_for_ending_effect = false;
-            counter_to_show_completed_line_effect = timer_to_show_completed_line_effect;
-
             for (int i = 0; i < STAGE_HEIGHT; i++)
             {
-                if(to_remove_lines[i] == 0) continue;               
-                
-                memset(stage+to_remove_lines[i],0,(STAGE_WIDTH-2)* sizeof(int)); //set the whole line to 0
+                if(to_remove_lines[i] == 0) continue;
 
-                PushDownTetrominos(to_remove_lines[i]/STAGE_WIDTH -1); //y * STAGE_WIDTH + 1
+                for (int j = 0; j < STAGE_WIDTH-2; j++)
+                {
+                    stage[to_remove_lines[i]+j] = index_color_effect;
+                }
             }
 
-            memset(to_remove_lines,0,sizeof(to_remove_lines));
+            counter_to_show_completed_line_effect -= GetFrameTime();
+            index_color_effect = (index_color_effect + 1) % 8;
+            if(counter_to_show_completed_line_effect < 0)
+            {
+                is_waiting_for_ending_effect = false;
+                counter_to_show_completed_line_effect = timer_to_show_completed_line_effect;
 
+                for (int i = 0; i < STAGE_HEIGHT; i++)
+                {
+                    if(to_remove_lines[i] == 0) continue;               
+                    
+                    memset(stage+to_remove_lines[i],0,(STAGE_WIDTH-2)* sizeof(int)); //set the whole line to 0
+
+                    PushDownTetrominos(to_remove_lines[i]/STAGE_WIDTH -1); //y * STAGE_WIDTH + 1
+                }
+
+                memset(to_remove_lines,0,sizeof(to_remove_lines));
+
+            }
+            return 1;
         }
-        goto game_loop_drawing;
-    }
+    return 0;
+}
 
-
-    //ACTUAL GAME LOOP
-
-    counter_to_move_tetromino_down -= GetFrameTime();
-
-    if(IsKeyPressed(KEY_E))
-    {
-        //debug key for doubling points
-        AddScore(actual_score);
-    }
-
-    PlayerInputManager();
-
-    game_loop_drawing:
-
-    BeginDrawing();
-    ClearBackground(TETRIS_GRAY);
-
+void DrawMainGame()
+{
     DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, TETRIS_BLUE_PURPLE);
     DrawText(TextFormat("Highscore: %08i", highscore), 20, 30, 20, TETRIS_LIGHT_GREEN);
     DrawText(TextFormat("Vertical Speed: %.3f", (1 - actual_falling_speed) ), 20, 50, 20, TETRIS_YELLOW);
@@ -325,5 +297,36 @@ void MainGameLoop()
         DrawText("Press [ESC] to quit!", start_offset_x-50, WINDOW_HEIGHT/2+20, 40, TETRIS_DARK_RED);
     }
 
+}
+
+void MainGameLoop()
+{
+    UpdateMusicStream(*current_music);
+
+    if(IsKeyPressed(KEY_P))
+    {
+        is_game_paused = !is_game_paused;
+    }
+
+    if(is_game_paused) goto game_loop_drawing;
+    
+    if(ManageCompletedLineEffect() == 1) goto game_loop_drawing;
+
+    //ACTUAL GAME LOOP
+    counter_to_move_tetromino_down -= GetFrameTime();
+
+    //debug key for doubling points
+    if(IsKeyPressed(KEY_E))
+    {
+        AddScore(actual_score);
+    }
+
+    PlayerInputManager();
+
+    game_loop_drawing:
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawMainGame();
     EndDrawing();
 }

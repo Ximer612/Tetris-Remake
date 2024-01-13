@@ -36,6 +36,10 @@ void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_te
                 DrawTexture(tetromino_texture,x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, tetromino_colors[color-1]);
                 //DrawRectangle(x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, tetromino_colors[color-1]);
             }
+            else{
+            DrawRectangle(x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, TETRIS_GRAY);
+
+            }
 
             DrawRectangleLines(x * TILE_SIZE + start_offset_x, y * TILE_SIZE + startOffsetY, TILE_SIZE, TILE_SIZE, BLACK);
         }
