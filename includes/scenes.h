@@ -12,7 +12,7 @@ typedef struct{
 } GameScene;
 
 
-void SwitchScene(GameScene* newScene, GameScene** actual_game_scene2);
+void SwitchScene(GameScene* newScene, GameScene** actual_game_scene);
 
 #endif
 

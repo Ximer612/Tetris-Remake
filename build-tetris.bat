@@ -1,1 +1,2 @@
-clang.exe -o Tetris.exe .\*.c .\scenes\*.c .\SinglyLinkedLists\singlylinkedlist.c -l .\raylibdll.lib -I .\includes
+md bin
+clang.exe -o .\bin\Tetris.exe .\src\*.c .\src\scenes\*.c .\src\SinglyLinkedLists\singlylinkedlist.c -l .\raylibdll.lib -I .\includes
