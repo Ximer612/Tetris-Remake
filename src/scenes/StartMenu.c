@@ -4,6 +4,7 @@
 #include <extra_colors.h>
 #include <game_settings.h>
 
+//EXTERN VARIABLES
 extern Sound sfx_start_game;
 extern Music* current_music;
 extern Music music_startmenu;
@@ -12,12 +13,13 @@ extern GameScene* actual_game_scene;
 extern int highscore;
 extern Texture2D tetromino_texture;
 
+//ROTATION ANIMATION VARAIBLES
 const Vector2 back_tetromino_pos = {WINDOW_WIDTH/2,WINDOW_HEIGHT/2+150};
 const float back_tetromino_size = 5;
-
 float back_tetromino_rot = 0;
-float back_tetromino_rot_speed = 10;
+const float back_tetromino_rot_speed = 10;
 
+/// @brief Plays the rotating tetromino animation, plays music, waits the player to be ready to play
 void StartMenuLoop()
 {
     UpdateMusicStream(*current_music);
@@ -45,14 +47,15 @@ void StartMenuLoop()
     EndDrawing();
 }
 
+/// @brief Plays the start menu music
 void StartMenuOnEnter()
 {
     current_music = &music_startmenu;
     PlayMusicStream(*current_music);
 }
 
+/// @brief Plays a sound to
 void StartMenuOnExit()
 {
-    SetSoundVolume(sfx_start_game,2.f);
     PlaySound(sfx_start_game);
 }

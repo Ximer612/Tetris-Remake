@@ -4,6 +4,7 @@
 #include <extra_colors.h>
 #include <game_settings.h>
 
+//EXTERN VARIABLES
 extern Sound sfx_explosion;
 extern Music* current_music;
 extern Music music_gameover;
@@ -12,6 +13,7 @@ extern GameScene* actual_game_scene;
 extern int highscore;
 extern int actual_score;
 
+/// @brief Shows game over text with last score and highscore and waits the player to quit or restart the game
 void GameOverLoop()
 {
     UpdateMusicStream(*current_music);
@@ -34,10 +36,10 @@ void GameOverLoop()
     EndDrawing();
 }
 
+/// @brief changes music to gameover music and plays an explosion
 void GameOverOnEnter()
 {
     current_music = &music_gameover;
     PlayMusicStream(*current_music);
-
     PlaySound(sfx_explosion);
 }

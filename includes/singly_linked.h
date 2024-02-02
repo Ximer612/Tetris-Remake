@@ -1,5 +1,5 @@
-#ifndef SINGLY_DEFINE
-#define SINGLY_DEFINE
+#ifndef SINGLY_LIST_DEFINE
+#define SINGLY_LIST_DEFINE
 
 #define TO_INT_LIST(x) (int_singly_list_item*)(x)
 #define TO_INT_LIST_POINTER(x) (int_singly_list_item**)(x)

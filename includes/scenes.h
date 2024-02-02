@@ -1,4 +1,3 @@
-
 #ifndef SCENE_DEFINE
 #define SCENE_DEFINE
 
@@ -11,18 +10,5 @@ typedef struct{
 
 } GameScene;
 
-
 void SwitchScene(GameScene* newScene, GameScene** actual_game_scene);
-
 #endif
-
-void StartMenuOnExit();
-void StartMenuLoop();
-void StartMenuOnEnter();
-
-void GameOverLoop();
-void GameOverOnEnter();
-
-void MainGameOnExit();
-void MainGameOnEnter();
-void MainGameLoop();

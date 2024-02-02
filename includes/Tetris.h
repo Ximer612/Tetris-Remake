@@ -1,3 +1,5 @@
+#ifndef TETRIS_FUNCTIONS_DEFINITIONS
+#define TETRIS_FUNCTIONS_DEFINITIONS
 #include <raylib.h>
 #include <singly_linked.h>
 #include <extra_colors.h>
@@ -10,6 +12,20 @@
 #define MAX_FALL_SPEED  1
 #define DOWN_POINTS     10
 #define LINE_POINTS     200
+
+//TetrisLogic.c
+int CheckCollision(const int tetromino_start_x, const int tetromino_start_y, const int *tetromino);
+int SpawnNewPlayerTetromino(int_singly_list_item** next_tetrominos, const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color);
+int DeleteCompletedLines(int* to_remove_lines);
+void PushDownTetrominos(int start_line_y);
+void SetNextPieces(int_singly_list_item** next_tetrominos, const int num_of_next_pieces);
+
+//TetrisDraw.c
+void DrawTetromino(const Texture2D tetromino_texture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y, const int *tetromino);
+void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y);
+void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y);
+
+#endif //TETRIS_FUNCTIONS_DEFINITIONS
 
 #ifdef TETRIS_DEFINITIONS
 
@@ -295,17 +311,3 @@ const int *tetromino_types[7][4] =
 
 #endif //TETRIS_DEFINITIONS
 
-#ifndef TETRIS_FUNCTIONS_DEFINITIONS
-#define TETRIS_FUNCTIONS_DEFINITIONS
-//TetrisLogic.c
-int CheckCollision(const int tetromino_start_x, const int tetromino_start_y, const int *tetromino);
-int SpawnNewPlayerTetromino(int_singly_list_item** next_tetrominos, const int tetromino_start_x, const int tetromino_start_y, int* current_tetromino_x, int* current_tetromino_y,int* current_tetromino_type,int* last_tetramino_type, int* current_rotation, int* current_player_color);
-int DeleteCompletedLines(int* to_remove_lines);
-void PushDownTetrominos(int start_line_y);
-void SetNextPieces(int_singly_list_item** next_tetrominos, const int num_of_next_pieces);
-
-//TetrisDraw.c
-void DrawTetromino(const Texture2D tetromino_texture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y, const int *tetromino);
-void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y);
-void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y);
-#endif
