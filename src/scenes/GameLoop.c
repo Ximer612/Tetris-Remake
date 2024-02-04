@@ -4,9 +4,7 @@
 #include <tetris.h>
 #include <extra_colors.h>
 #include <string.h>
-#include <math.h>
 #include <game_settings.h>
-#include <raylib_custom_functions.h>
 #include <stdlib.h>
 #include <singly_linked.h>
 
@@ -72,7 +70,7 @@ void MainGameOnExit()
     if (actual_score > highscore)
     {
         highscore = actual_score;
-        SaveFileText(SAVE_PATH, (char*)TextFormat("%d", highscore));
+        SaveFileText(SAVE_FILE, (char*)TextFormat("%d", highscore));
     }
 }
 
@@ -104,8 +102,8 @@ void MainGameOnEnter()
 void RecalculateFallingSpeed()
 {
     actual_falling_speed = MAX_FALL_SPEED - (actual_score * 0.0001f);
-    actual_falling_speed = MIN(actual_falling_speed, MAX_FALL_SPEED);
-    actual_falling_speed = MAX(actual_falling_speed, MIN_FALL_SPEED);
+    actual_falling_speed = min(actual_falling_speed, MAX_FALL_SPEED);
+    actual_falling_speed = max(actual_falling_speed, MIN_FALL_SPEED);
 }
 
 /// @brief Adds the score to the actual score and recalculate the falling speed
@@ -307,7 +305,7 @@ int ManageCompletedLineEffect()
     return 0;
 }
 
-/// @brief Draws the score, highscore, vertiacl speed, all tetrominos and pause menu if enabled
+/// @brief Draws the score, highscore, vertical speed, all tetrominos and pause menu if enabled
 void DrawMainGame()
 {
     DrawText(TextFormat("Score: %08i", actual_score), 20, 10, 20, TETRIS_BLUE_PURPLE);
@@ -316,7 +314,7 @@ void DrawMainGame()
 
     DrawStageTetrominos(tetromino_texture, current_tetromino_x, current_tetromino_y, start_offset_x, start_offset_y);
     DrawText("Next tetrominos:", next_tetromino_start_x - 50, next_tetromino_start_y - 30, 20, TETRIS_DARK_RED);
-    DrawNextPieces(next_tetrominos, tetromino_texture, next_tetromino_start_x, next_tetromino_start_y);
+    DrawNextPieces(next_tetrominos, tetromino_texture, next_tetromino_start_x, next_tetromino_start_y, tetromino_types);
     DrawTetromino(tetromino_texture, tetromino_colors[current_player_color], current_tetromino_x, current_tetromino_y, start_offset_x, start_offset_y, tetromino_types[current_tetromino_type][current_rotation]);
 
     if (is_game_paused)

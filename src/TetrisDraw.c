@@ -46,9 +46,7 @@ void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_te
     }
 }
 
-extern const int *tetromino_types[7][4];
-
-void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y)
+void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y,const int *tetromino_types[][4])
 {
     int_singly_list_item* current_tetromino = (struct int_singly_list_item *)next_tetrominos;
 

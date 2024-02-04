@@ -1,5 +1,6 @@
-#ifndef COLORS
-#define COLORS
+
+#ifndef EXTRA_COLORS
+#define EXTRA_COLORS
 
 #define TETRIS_GRAY  CLITERAL(Color){40,40,40,255}   // Background color for the game
 #define TETRIS_BLACK_OPAQUE  CLITERAL(Color){0,0,0,100}   // Transparent color for the pause panel
@@ -20,4 +21,4 @@
 #define TETROMINO_BLUE CLITERAL(Color){0,0,240,255}
 #define TETROMINO_ORANGE CLITERAL(Color){240,160,0,255}
 
-#endif
+#endif //EXTRA_COLORS

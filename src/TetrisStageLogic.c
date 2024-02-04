@@ -1,5 +1,4 @@
 #include <tetris.h>
-#include <raylib_custom_functions.h>
 #include <singly_linked.h>
 #include <stdlib.h>
 
@@ -138,4 +137,3 @@ void PushDownTetrominos(int start_line_y)
         }
     }   
 }
-

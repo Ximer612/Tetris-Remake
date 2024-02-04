@@ -3,7 +3,7 @@
 
 typedef struct{
 
-    char* scene_name;
+    const char* scene_name;
     void (*OnEnter)();
     void (*Loop)();
     void (*OnExit)();
@@ -11,4 +11,5 @@ typedef struct{
 } GameScene;
 
 void SwitchScene(GameScene* newScene, GameScene** actual_game_scene);
-#endif
+
+#endif //SCENE_DEFINE

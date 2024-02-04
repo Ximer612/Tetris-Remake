@@ -1,6 +1,6 @@
-#include <stdio.h>
 
 #ifdef DEBUG_PRINT
+    #include <stdio.h>
     #define SET_BLUE_PRINT() printf("\033[0;34m")
     #define SET_GREEN_PRINT() printf("\033[0;32m")
     #define SET_RED_PRINT() printf("\033[0;31m")

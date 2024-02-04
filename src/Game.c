@@ -2,9 +2,9 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
-#include <raylib_custom_functions.h>
 #include <scenes.h>
 #include <game_settings.h>
+#define DEBUG_PRINT
 #include <console_utilities.h>
 
 //GAME SCENES VARIABLES
@@ -47,12 +47,12 @@ void LoadAudios()
     sfx_start_game = LoadSound("assets/audio/start_game.wav");
     sfx_rotate_tetromino = LoadSound("assets/audio/rotate_tetromino.wav");
 
-    SetSoundVolume(sfx_hit_piece, 0.2f);
-    SetSoundVolume(sfx_line_completed, 0.2f);
-    SetSoundVolume(sfx_explosion, 0.2f);
-    SetSoundVolume(sfx_move_tetromino, 0.2f);
-    SetSoundVolume(sfx_start_game, 0.1f);
-    SetSoundVolume(sfx_rotate_tetromino, 0.3f);
+    SetSoundVolume(sfx_hit_piece,        0.2f);
+    SetSoundVolume(sfx_line_completed,   0.2f);
+    SetSoundVolume(sfx_explosion,        0.2f);
+    SetSoundVolume(sfx_move_tetromino,   0.05f);
+    SetSoundVolume(sfx_start_game,       0.1f);
+    SetSoundVolume(sfx_rotate_tetromino, 0.1f);
 
     //load musics
     music_ingame1 = LoadMusicStream("assets/music/in_game1.wav");
@@ -60,9 +60,9 @@ void LoadAudios()
     music_gameover = LoadMusicStream("assets/music/game_over.wav");
     music_startmenu = LoadMusicStream("assets/music/start_menu.wav");
 
-    SetMusicVolume(music_gameover, 0.1f);
-    SetMusicVolume(music_ingame1, 0.1f);
-    SetMusicVolume(music_ingame2, 0.1f);
+    SetMusicVolume(music_gameover,  0.1f);
+    SetMusicVolume(music_ingame1,   0.1f);
+    SetMusicVolume(music_ingame2,   0.1f);
     SetMusicVolume(music_startmenu, 0.1f);
 }
 
@@ -118,9 +118,9 @@ void UnloadAudios() {
 void LoadLastHighScore()
 {
     //load file with highscore
-    if (FileExists(SAVE_PATH))
+    if (FileExists(SAVE_FILE))
     {
-        char* text = LoadFileText(SAVE_PATH);
+        char* text = LoadFileText(SAVE_FILE);
         if (text)
         {
             highscore = atoi(text);

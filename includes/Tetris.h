@@ -23,7 +23,7 @@ void SetNextPieces(int_singly_list_item** next_tetrominos, const int num_of_next
 //TetrisDraw.c
 void DrawTetromino(const Texture2D tetromino_texture, const Color current_color, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y, const int *tetromino);
 void DrawStageTetrominos(const Texture2D tetromino_texture, const int current_tetromino_x, const int current_tetromino_y, const int start_offset_x, const int start_offset_y);
-void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y);
+void DrawNextPieces(const int_singly_list_item* next_tetrominos,const Texture2D tetromino_texture,const int next_tetromino_start_x,const int next_tetromino_start_y,const int *tetromino_types[][4]);
 
 #endif //TETRIS_FUNCTIONS_DEFINITIONS
 
