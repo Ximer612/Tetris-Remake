@@ -2,8 +2,8 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
-#include <scenes.h>
 #include <game_settings.h>
+#include <scenes.h>
 #define DEBUG_PRINT
 #include <console_utilities.h>
 

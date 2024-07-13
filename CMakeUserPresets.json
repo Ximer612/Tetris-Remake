@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "E:\\Documenti\\GitHub\\Tetris-Remake\\build\\conan\\build\\Debug\\generators\\CMakePresets.json"
+    ]
+}

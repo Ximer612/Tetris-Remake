@@ -237,7 +237,8 @@ void CheckMovementKeysDown()
             PlayWithRandomPitch(sfx_move_tetromino);
         }
     }
-    else if (IsKeyDown(KEY_LEFT))
+    
+    if (IsKeyDown(KEY_LEFT))
     {
         if (TickPressingKeyTimer(KEY_LEFT))
         {
@@ -251,7 +252,8 @@ void CheckMovementKeysDown()
             MoveHorizontal(RIGHT);
         }
     }
-    else if (IsKeyReleased(KEY_DOWN) || IsKeyReleased(KEY_LEFT) || IsKeyReleased(KEY_RIGHT))
+
+    if (IsKeyReleased(KEY_DOWN) || IsKeyReleased(KEY_LEFT) || IsKeyReleased(KEY_RIGHT))
     {
         counter_to_continuous_movement = default_counter_to_continous_movement_value;
     }
